@@ -3,7 +3,6 @@
 // add license stuff to header/implementation files
 
 #include "gendy_sfr.h"
-#include <cmath>
 
 breakpoint::breakpoint(unsigned int duration, float amplitude) {
 	this.duration = duration;

@@ -139,19 +139,19 @@ void gendy::set_num_breakpoints(float num_breakpoints) {
 }
 
 void gendy::set_h_step(float new_stepsize) {
-	waveform.set_h_step(new_stepsize);
+	waveform.set_step_width(new_stepsize);
 }
 
 void gendy::set_v_step(float new_stepsize) {
-	waveform.set_v_step(new_stepsize);
+	waveform.set_step_height(new_stepsize);
 }
 
 void gendy::set_h_pull(float new_pull) {
-	waveform.set_h_pull(new_pull);
+	waveform.set_amplitude_pull(new_pull);
 }
 
 void gendy::set_v_pull(float new_pull) {
-	waveform.set_v_pull(new_pull);
+	waveform.set_duration_pull(new_pull);
 }
 
 void gendy::set_interpolation_lin() {

@@ -4,14 +4,11 @@
 #include <cstdlib>
 #include <cmath>
 
-// full buffer return value
-const int BUFFULL = -1;
-
 // define interpolation types
-enum { LINEAR CUBIC SPLINE };
+enum { LINEAR CUBIC SPLINE SINC };
 
 // define center waveform shapes
-enum { SINE SQUARE TRIANGLE SAWTOOTH };
+enum { FLAT SINE SQUARE TRIANGLE SAWTOOTH };
 
 // class defs
 class breakpoint
@@ -38,24 +35,13 @@ class breakpoint
     void set_max_duration(unsigned int new_max);
     unsigned int get_duration();
     float get_amplitude();
+	//TODO: do we need these accessor fuctions?
     unsigned int get_center_duration();
     float get_center_amplitude();
 }; //end breakpoint class def
 
 class gendy_waveform
 {
-    public:
-    gendy_waveform();
-    //gendy_waveform(float freq);
-    void set_num_breakpoints(unsigned int new_size);
-    void set_avg_wavelength(unsigned int new_wavelength);
-    void set_interpolation(unsigned int new_interpolation);
-    void set_waveshape(unsigned int new_waveshape);
-    void set_step_width(float new_width);
-    void set_step_height(float new_height);
-    int get_wave_data(float *buffer, unsigned int n);
-
-    private:
     // buffer containing the current cycle of the waveform
     float *wave_samples;
     // index into wave_samples where the next copy request should start
@@ -79,7 +65,7 @@ class gendy_waveform
     // motion of the breakpoints. width is in micro-seconds.
     float step_width, step_height;
     // the extent to which the duration and amplitude are pulled to match
-    // a sine wave. ranges from 0 to 1
+    // the waveshape. ranges from 0 to 1
     float duration_pull, amplitude_pull;
 
     void move_breakpoints();
@@ -88,6 +74,20 @@ class gendy_waveform
     void remove_breakpoint_after(breakpoint *old_breakpoint);
     void center_breakpoints();
     void reset_breakpoints();
+
+    public:
+    gendy_waveform();
+    //gendy_waveform(float freq);
+    void set_num_breakpoints(unsigned int new_size);
+    void set_avg_wavelength(unsigned int new_wavelength);
+    void set_interpolation(unsigned int new_interpolation);
+    void set_waveshape(unsigned int new_waveshape);
+    void set_step_width(float new_width);
+    void set_step_height(float new_height);
+	void set_amplitude_pull(float new_pull);
+	void set_duration_pull(float new_pull);
+    int get_wave_data(float *buffer, unsigned int n);
+
 
 }; //end gendy_waveform class def
 
@@ -98,5 +98,4 @@ double randf();
 
 // returns gaussian random variable with mu 0 and sigma 1
 // From the GNU Scientific Library, src/randist/gauss.c
-
 double gauss();

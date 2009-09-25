@@ -52,6 +52,7 @@ next_first	gendy_sfr.h	/^    breakpoint *next_first;$/;"	m	class:gendy_waveform
 randf	gendy_sfr.cpp	/^double randf()$/;"	f
 remove_breakpoint	gendy_sfr.cpp	/^void gendy_waveform::remove_breakpoint()$/;"	f	class:gendy_waveform
 reset_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::reset_breakpoints()$/;"	f	class:gendy_waveform
+round	gendy_sfr.cpp	/^int round(float num)$/;"	f
 set_amplitude	gendy_sfr.cpp	/^void breakpoint::set_amplitude(float new_amplitude)$/;"	f	class:breakpoint
 set_avg_wavelength	gendy_sfr.cpp	/^void gendy_waveform::set_avg_wavelength(unsigned int new_wavelength)$/;"	f	class:gendy_waveform
 set_center	gendy_sfr.cpp	/^void breakpoint::set_center(unsigned int new_duration, float new_amplitude)$/;"	f	class:breakpoint

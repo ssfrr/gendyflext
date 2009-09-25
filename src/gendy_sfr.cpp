@@ -1,10 +1,9 @@
 // TODO:
 // check constructors/destructors/copy constructors/assignment
-// pd object constructor
-// pd object destructor
-// check DSP loop
 // add license stuff to header/implementation files
-// add max_duration to each breakpoint
+
+#include "gendy_sfr.h"
+#include <cmath>
 
 breakpoint::breakpoint(unsigned int duration, float amplitude,
         unsigned int center_dur, float center_amp)
@@ -27,15 +26,17 @@ breakpoint::breakpoint(unsigned int duration, float amplitude,
 // and 0 not pulling toward the center point at all.
 //
 // amplitudes out of the audio range [-1,1] are mirrored back in.  negative
-// durations are mirrored across 0 to become positive
+// durations are mirrored across 0 to become positive. Durations greater 
+// than max_duration are mirrored across max_duration
+//
 void breakpoint::elastic_move(float h_step, float v_step, 
         float h_pull, float v_pull)
 {
     long int new_duration;
     float new_amplitude;
 
-    new_duration = duration + (int)((1 - h_pull) * h_step * gauss() +
-        h_pull * (float)(center_dur - duration));
+    new_duration = duration + round((1.0 - h_pull) * h_step * gauss() +
+        (h_pull * (center_dur - duration)));
     // set mirror boundaries on new_duration
     do
     {
@@ -430,4 +431,9 @@ double gauss()
 
     /* Box-Muller transform */
     return y * sqrt (-2.0 * log(r2) / r2);
+}
+
+int round(float num)
+{
+	return int(floor(num + 0.5));
 }

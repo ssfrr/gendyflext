@@ -20,7 +20,6 @@ class breakpoint
     // store the center point the breakpoint gravitates to
     float center_amp;
     unsigned int center_dur;
-
     unsigned int max_duration;
 
     public:
@@ -62,7 +61,7 @@ class gendy_waveform
     // constrain endpoints to 0
     bool constrain_endpoints;
     // std. dev. of the normal distribution that determines the
-    // motion of the breakpoints. width is in micro-seconds.
+    // motion of the breakpoints. width is in samples.
     float step_width, step_height;
     // the extent to which the duration and amplitude are pulled to match
     // the waveshape. ranges from 0 to 1
@@ -99,3 +98,6 @@ double randf();
 // returns gaussian random variable with mu 0 and sigma 1
 // From the GNU Scientific Library, src/randist/gauss.c
 double gauss();
+
+// returns nearest integer. X.5 always rounded to X+1, so it's non-symmetrical
+int round(float num);

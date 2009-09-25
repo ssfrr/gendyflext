@@ -23,6 +23,7 @@ class breakpoint
 	unsigned int max_duration;
 
 	public:
+	breakpoint(unsigned int duration, float amplitude);
 	breakpoint(unsigned int duration, float amplitude,
 			unsigned int center_dur, float center_amp);
 	void elastic_move(float h_step, float v_step, 
@@ -69,8 +70,8 @@ class gendy_waveform
 
 	void move_breakpoints();
 	void generate_from_breakpoints();
-	void add_breakpoint_after(breakpoint *old_breakpoint);
-	void remove_breakpoint_after(breakpoint *old_breakpoint);
+	void add_breakpoint();
+	void remove_breakpoint();
 	void center_breakpoints();
 	void reset_breakpoints();
 

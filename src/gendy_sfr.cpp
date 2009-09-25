@@ -5,12 +5,18 @@
 #include "gendy_sfr.h"
 #include <cmath>
 
+breakpoint::breakpoint(unsigned int duration, float amplitude) {
+	this.duration = duration;
+	this.amplitude = amplitude;
+}
+
 breakpoint::breakpoint(unsigned int duration, float amplitude,
 		unsigned int center_dur, float center_amp) {
 	this.duration = duration;
 	this.amplitude = amplitude;
 	this.center_dur = center_dur;
 	this.center_amp = center_amp;
+	max_duration = center_dur * 10;
 }
 
 // elastic_move
@@ -120,8 +126,7 @@ gendy_waveform::gendy_waveform() {
 	wave_samples = new float[average_wavelength * 10];
 
 	// start with a single breakpoint that spans the whole wavelength
-	breakpoint initial(147,0,147,0);
-	breakpoint_list.push_front(initial);
+	breakpoint_list.push_front(new breakpoint(147,0,147,0));
 	next_first = new breakpoint(147,0,147,0);
 
 	set_num_breakpoints(8);
@@ -247,37 +252,38 @@ void gendy_waveform::add_breakpoint() {
 	unsigned int new_duration; 
 	float new_amplitude;
 
-	unsigned int largest_space = 0;
-	list<breakpoint>::iterator largest_space_position;
+	unsigned int longest_dur = 0;
+	list<breakpoint>::iterator longest_dur_breakpoint;
 	list<breakpoint>::iterator i = breakpoint_list.begin();
-	breakpoint new_breakpoint;
 
 	// find the largest space
 	while(i != breakpoint_list.end()) {
-		if((i->duration) > largest_space) {
-			largest_space = i->duration;
-			largest_space_position = i;
+		if((i->get_duration()) > longest_dur) {
+			longest_dur = i->get_duration();
+			longest_dur_breakpoint = i;
 		}
 		i++;
 	} 
 
 	// set the duration of the new breakpoint to be half the previous
-	new_duration = i->get_duration() / 2;
+	new_duration = longest_dur_breakpoint->get_duration() / 2;
 	// halve the duration of the previous breakpoint
-	i.set_duration(new_duration);
+	longest_dur_breakpoint->set_duration(new_duration);
 	// set the new amplitude to be the average of the 2 adjacent breakpoints
-	// and move i to the next breakpoint for insertion
-	if(i == --breakpoint_list.end()) {
-		new_amplitude = (i->get_amplitude() + next_first->get_amplitude()) 
-			/ 2;
-		i++;
+	// and move longest_dur_breakpoint iterator to the next breakpoint 
+	// for insertion
+	if(longest_dur_breakpoint == --breakpoint_list.end()) {
+		new_amplitude = (longest_dur_breakpoint->get_amplitude() + 
+				next_first->get_amplitude()) / 2;
+		longest_dur_breakpoint++;
 	}
 	else
-		new_amplitude = (i->get_amplitude() + (++i)->get_amplitude()) / 2;
+		new_amplitude = (longest_dur_breakpoint->get_amplitude() + 
+				(++longest_dur_breakpoint)->get_amplitude()) / 2;
 	new_breakpoint.set_duration(new_duration);
 	new_breakpoint.set_amplitude(new_amplitude);
 	// insert the breakpoint in the list
-	breakpoint_list.insert(i, new_breakpoint);
+	breakpoint_list.insert(i, new breakpoint(new_duration, new_amplitude));
 }
 
 // remove the breakpoint closest to its neighbors. breakpoints centers

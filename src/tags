@@ -17,6 +17,7 @@ add_breakpoint	gendy_sfr.cpp	/^void gendy_waveform::add_breakpoint() {$/;"	f	cla
 amplitude	gendy_sfr.h	/^	float amplitude;$/;"	m	class:breakpoint
 amplitude_pull	gendy_sfr.h	/^	float duration_pull, amplitude_pull;$/;"	m	class:gendy_waveform
 average_wavelength	gendy_sfr.h	/^	unsigned int average_wavelength;$/;"	m	class:gendy_waveform
+breakpoint	gendy_sfr.cpp	/^breakpoint::breakpoint(unsigned int duration, float amplitude) {$/;"	f	class:breakpoint
 breakpoint	gendy_sfr.cpp	/^breakpoint::breakpoint(unsigned int duration, float amplitude,$/;"	f	class:breakpoint
 breakpoint	gendy_sfr.h	/^class breakpoint$/;"	c
 breakpoint_list	gendy_sfr.h	/^	list<breakpoint> breakpoint_list;$/;"	m	class:gendy_waveform

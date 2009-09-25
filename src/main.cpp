@@ -17,8 +17,6 @@ using namespace std;
 #error You need at least flext version 0.5.0
 #endif
 
-const int MAX_LEFTOVER 10000
-
 
 // A flext dsp external ("tilde object") inherits from the class flext_dsp 
 class gendy:  public flext_dsp {
@@ -34,8 +32,6 @@ class gendy:  public flext_dsp {
 		virtual void m_signal(int n, float *const *in, float *const *out);
 	private:	
 		gendy_waveform *waveform;
-        float leftover_waveform[];
-        unsigned int leftover_length;
 		bool debug;
 		// class-wide variable to keep track of how many objects exist
 		static gendy_count = 0;
@@ -82,8 +78,6 @@ gendy::gendy() {
     AddOutSignal("audio out");          // audio output
 	// TODO: error checking for memory allocation
 	waveform = new gendy_waveform;
-	leftover_waveform = new float[MAX_LEFTOVER];
-	leftover_length = 0;
 	debug = false;
 	if(debug)
 		post("gendy~ #%d: Constructor terminated", id);
@@ -94,7 +88,6 @@ gendy::~gendy() {
 		post("gendy~ #%d: Destructor initiated", id);
 	gendy_count--;
 	delete waveform;
-	delete[] leftover_waveform;
 	if(debug)
 		post("gendy~ #%d: Destructor terminated", id);
 }

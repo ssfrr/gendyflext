@@ -286,10 +286,9 @@ void gendy_waveform::add_breakpoint() {
 	else
 		new_amplitude = (longest_dur_breakpoint->get_amplitude() + 
 				(++longest_dur_breakpoint)->get_amplitude()) / 2;
-	new_breakpoint.set_duration(new_duration);
-	new_breakpoint.set_amplitude(new_amplitude);
 	// insert the breakpoint in the list
-	breakpoint_list.insert(i, new breakpoint(new_duration, new_amplitude));
+	breakpoint_list.insert(longest_dur_breakpoint, 
+			new breakpoint(new_duration, new_amplitude));
 }
 
 // remove the breakpoint closest to its neighbors. breakpoints centers
@@ -301,15 +300,17 @@ void gendy_waveform::remove_breakpoint() {
 	list<breakpoint>::iterator smallest_space_position;
 	list<breakpoint>::iterator i = breakpoint_list.begin();
 
-	// find the breakpoint furthest from the adjacent breakpoints
+	// find the breakpoint closest to the adjacent breakpoints
+	// NB: won't ever remove first or last breakpoint
 	while(i != --breakpoint_list.end()) {
-		if((space = i->duration + (++i)->duration) < smallest_space) {
+		if((space = i->get_duration() + (++i)->get_duration()) < smallest_space) {
 			smallest_space = space;
 			smallest_space_position = i;
 		}
 	} 
 	// erase returns the list element following the erased one
 	smallest_space_position = breakpoint_list.erase(smallest_space_position);
+	// add the erased breakpoint's duration to the previous breakpoint
 	(--smallest_space_position)->set_duration(smallest_space);
 }
 

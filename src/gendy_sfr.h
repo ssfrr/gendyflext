@@ -31,6 +31,8 @@ class breakpoint
 	void set_duration(unsigned int new_duration);
 	void set_amplitude(float new_amplitude);
 	void set_position(unsigned int new_duration, float new_amplitude);
+	void set_center_duration(unsigned int new_duration);
+	void set_center_amplitude(float new_amplitude);
 	void set_center(unsigned int new_duration, float new_amplitude);
 	void set_max_duration(unsigned int new_max);
 	unsigned int get_duration();
@@ -87,7 +89,7 @@ class gendy_waveform
 	void set_amplitude_pull(float new_pull);
 	void set_duration_pull(float new_pull);
 	void set_constrain_endpoints(bool constrain);
-	int get_wave_data(float *buffer, unsigned int n);
+	unsigned int get_wave_data(float *buffer, unsigned int n);
 
 
 }; //end gendy_waveform class def

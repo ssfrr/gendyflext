@@ -366,25 +366,24 @@ void gendy_waveform::reset_breakpoints() {
 			next_first->get_center_amplitude());
 }
 
-// copy as much of the wave data as possible into a buffer of size n,
-// returns number of samples copied or BUFFULL if the buffer has been
-// filled. The next time it is called the remainder of the waveform is
-// copied
-int gendy_waveform::get_wave_data(float *buffer, unsigned int n) {
-	int samples_copied = 0;
-	// if the waveform has been completely copied out, generate a new one
-	if(copy_index == current_wavelength) {
-		move_breakpoints();
-		generate_from_breakpoints();
-		copy_index = 0;
+// copies the waveform into a buffer of size n until the buffer is full.  When
+// the waveform is fully copied another cycle is generated.
+unsigned int gendy_waveform::get_wave_data(float *buffer, unsigned int n) {
+	unsigned int samples_copied = 0;
+	// keep track of where in the waveform we're copying from
+	static unsigned int copy_index = 0;
+	while(samples_copied < n) {
+		// if the waveform has been completely copied out, generate a new one
+		if(copy_index == current_wavelength) {
+			move_breakpoints();
+			generate_from_breakpoints();
+			copy_index = 0;
+		}
+		// copy samples until the output buffer or the waveform buffer runs out
+		while(samples_copied < n && copy_index < current_wavelength)
+			buffer[samples_copied++] = wave_samples[copy_index++];
 	}
-	// copy samples until the output buffer or the waveform buffer runs out
-	while(samples_copied++ < n && copy_index < current_wavelength)
-		*(buffer++) = wave_samples[copy_index++];
-	if(samples_copied == n)
-		return BUFFULL;
-	else
-		return samples_copied;
+	return samples_copied;
 }
 
 // return a uniformly distributed double-precision float between 0 and 1

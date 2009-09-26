@@ -76,6 +76,14 @@ void breakpoint::set_position(unsigned int new_duration, float new_amplitude) {
 	amplitude = new_amplitude;
 }
 
+void breakpoint::set_center_duration(unsigned int new_duration) {
+	center_dur = new_duration;
+}
+
+void breakpoint::set_center_amplitude(float new_amplitude) {
+	center_amp = new_amplitude;
+}
+
 // set_center
 // accessor function to set the amplitude and duration of a breakpoint's
 // center position
@@ -323,34 +331,24 @@ void gendy_waveform::center_breakpoints() {
 	unsigned int new_dur;
 	float new_amp;
 
-	if(waveshape == SINE)
-		for(current = breakpoint_list.begin(); 
-				current != breakpoint_list.end(); current++) {
-			// evenly distribute the breakpoints along the waveform
-			new_dur = average_wavelength / num_breakpoints;
-			// set amplitudes to match a single cycle of sine 
-			new_amp = sin(2 * M_PI * i / num_breakpoints);
-			current.set_center(new_dur, new_amp);
-			current.set_max_duration(average_wavelength * 10 
-					/ num_breakpoints);
-			i++;
-		}
-	else if(waveshape == SQUARE)
-		for(current = breakpoint_list.begin(); 
-				current != breakpoint_list.end(); current++) {
-			// evenly distribute the breakpoints along the waveform
-			new_dur = average_wavelength / num_breakpoints;
-			// set amplitudes to match a single cycle of square wave {
-				if(((float)i / num_breakpoints) > 0.5)
-					new_amp = 1;
-				else
-					new_amp = -1;
-			}
-			current.set_center(new_dur, new_amp);
-			current.set_max_duration(average_wavelength * 10 
-					/ num_breakpoints);
-			i++;
-		}
+	for(current = breakpoint_list.begin();
+			current != breakpoint_list.end(); current++) {
+		// evenly distribute the breakpoints along the waveform
+		current->set_center_duration(average_wavelength / num_breakpoints);
+		current->set_max_duration(int(average_wavelength * 10 / 
+					num_breakpoints));
+
+		if(waveshape == FLAT)
+			current->set_center_amplitude(0);
+		else if(waveshape == SINE)
+			current->set_center_amplitude(sin(2 * M_PI * i / num_breakpoints));
+		else if(waveshape == SQUARE)
+			if((float(i) / num_breakpoints) > 0.5)
+				current->set_center_amplitude(1);
+			else
+				current->set_center_amplitude(-1);
+		i++;
+	}
 	// copy new center info to the next_first breakpoint
 	next_first.set_center(breakpoint_list.begin()->get_center_duration(),
 			breakpoint_list.begin()->get_center_amplitude());

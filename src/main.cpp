@@ -31,10 +31,10 @@ class gendy:  public flext_dsp {
 		// here we declare the virtual DSP function
 		virtual void m_signal(int n, float *const *in, float *const *out);
 	private:	
-		gendy_waveform *waveform;
+		gendy_waveform waveform;
 		bool debug;
 		// class-wide variable to keep track of how many objects exist
-		static gendy_count = 0;
+		static unsigned int gendy_count;
 		// instance ID
 		unsigned int id;
         
@@ -48,6 +48,7 @@ class gendy:  public flext_dsp {
         FLEXT_CALLBACK(set_interpolation_lin)
         FLEXT_CALLBACK(set_interpolation_cubic)
         FLEXT_CALLBACK(set_interpolation_spline)
+        FLEXT_CALLBACK(set_interpolation_sinc)
         FLEXT_CALLBACK_I(set_debug)
 
 		// Message handling functions
@@ -60,13 +61,14 @@ class gendy:  public flext_dsp {
         void set_interpolation_lin();
         void set_interpolation_cubic();
         void set_interpolation_spline();
+        void set_interpolation_sinc();
 		void set_debug(int new_debug);
 
 		// Internal class methods
         static void class_setup(t_classid thisclass);
-		void set_interpolation(unsigned int interpolation);
+		void set_interpolation(int interpolation);
 };
-
+unsigned int gendy::gendy_count = 0;
 
 // object class constructor(run at each gendy object creation)
 gendy::gendy() {
@@ -77,7 +79,6 @@ gendy::gendy() {
     AddInAnything("control input");    // control input
     AddOutSignal("audio out");          // audio output
 	// TODO: error checking for memory allocation
-	waveform = new gendy_waveform;
 	debug = false;
 	if(debug)
 		post("gendy~ #%d: Constructor terminated", id);
@@ -87,7 +88,6 @@ gendy::~gendy() {
 	if(debug)
 		post("gendy~ #%d: Destructor initiated", id);
 	gendy_count--;
-	delete waveform;
 	if(debug)
 		post("gendy~ #%d: Destructor terminated", id);
 }
@@ -101,7 +101,10 @@ void gendy::class_setup(t_classid thisclass) {
     FLEXT_CADDMETHOD_(thisclass, 0, "v_step", set_v_step);
     FLEXT_CADDMETHOD_(thisclass, 0, "h_pull", set_h_pull);
     FLEXT_CADDMETHOD_(thisclass, 0, "v_pull", set_v_pull);
-    FLEXT_CADDMETHOD_(thisclass, 0, "interpolation", set_interpolation);
+    FLEXT_CADDMETHOD_(thisclass, 0, "linear", set_interpolation_lin);
+    FLEXT_CADDMETHOD_(thisclass, 0, "cubic", set_interpolation_cubic);
+    FLEXT_CADDMETHOD_(thisclass, 0, "spline", set_interpolation_spline);
+    FLEXT_CADDMETHOD_(thisclass, 0, "sinc", set_interpolation_sinc);
     FLEXT_CADDMETHOD_(thisclass, 0, "debug", set_debug);
     post("--- gendy~ by Spencer Russell ---");
 }
@@ -119,12 +122,7 @@ void gendy::m_signal(int n, float *const *in, float *const *out) {
     int filled_index = 0;
     int retreived_samples = 0;
 	
-    // keep grabbing cycles of waveform until the output buffer is full
-	while (filled_index < n) {
-	    retreived_samples = waveform.get_wave_data(outs + filled_index, 
-				n - filled_index);
-		// move insertion index by the number of samples we just grabbed
-        filled_index += retreived_samples;
+	waveform.get_wave_data(outs, n);
 	}
 }
 

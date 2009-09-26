@@ -4,11 +4,13 @@
 #include <cstdlib>
 #include <cmath>
 
+using namespace std;
+
 // define interpolation types
-enum { LINEAR CUBIC SPLINE SINC };
+enum { LINEAR, CUBIC, SPLINE, SINC };
 
 // define center waveform shapes
-enum { FLAT SINE SQUARE TRIANGLE SAWTOOTH };
+enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };
 
 // class defs
 class breakpoint

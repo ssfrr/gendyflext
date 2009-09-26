@@ -4,6 +4,8 @@
 
 #include "gendy_sfr.h"
 
+using namespace std;
+
 breakpoint::breakpoint(unsigned int duration, float amplitude) {
 	this.duration = duration;
 	this.amplitude = amplitude;

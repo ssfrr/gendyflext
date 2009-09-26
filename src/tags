@@ -4,15 +4,15 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.7	//
-CUBIC	gendy_sfr.h	/^enum { LINEAR CUBIC SPLINE SINC };$/;"	e	enum:__anon1
-FLAT	gendy_sfr.h	/^enum { FLAT SINE SQUARE TRIANGLE SAWTOOTH };$/;"	e	enum:__anon2
-LINEAR	gendy_sfr.h	/^enum { LINEAR CUBIC SPLINE SINC };$/;"	e	enum:__anon1
-SAWTOOTH	gendy_sfr.h	/^enum { FLAT SINE SQUARE TRIANGLE SAWTOOTH };$/;"	e	enum:__anon2
-SINC	gendy_sfr.h	/^enum { LINEAR CUBIC SPLINE SINC };$/;"	e	enum:__anon1
-SINE	gendy_sfr.h	/^enum { FLAT SINE SQUARE TRIANGLE SAWTOOTH };$/;"	e	enum:__anon2
-SPLINE	gendy_sfr.h	/^enum { LINEAR CUBIC SPLINE SINC };$/;"	e	enum:__anon1
-SQUARE	gendy_sfr.h	/^enum { FLAT SINE SQUARE TRIANGLE SAWTOOTH };$/;"	e	enum:__anon2
-TRIANGLE	gendy_sfr.h	/^enum { FLAT SINE SQUARE TRIANGLE SAWTOOTH };$/;"	e	enum:__anon2
+CUBIC	gendy_sfr.h	/^enum { LINEAR, CUBIC, SPLINE, SINC };$/;"	e	enum:__anon1
+FLAT	gendy_sfr.h	/^enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };$/;"	e	enum:__anon2
+LINEAR	gendy_sfr.h	/^enum { LINEAR, CUBIC, SPLINE, SINC };$/;"	e	enum:__anon1
+SAWTOOTH	gendy_sfr.h	/^enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };$/;"	e	enum:__anon2
+SINC	gendy_sfr.h	/^enum { LINEAR, CUBIC, SPLINE, SINC };$/;"	e	enum:__anon1
+SINE	gendy_sfr.h	/^enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };$/;"	e	enum:__anon2
+SPLINE	gendy_sfr.h	/^enum { LINEAR, CUBIC, SPLINE, SINC };$/;"	e	enum:__anon1
+SQUARE	gendy_sfr.h	/^enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };$/;"	e	enum:__anon2
+TRIANGLE	gendy_sfr.h	/^enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };$/;"	e	enum:__anon2
 add_breakpoint	gendy_sfr.cpp	/^void gendy_waveform::add_breakpoint() {$/;"	f	class:gendy_waveform
 amplitude	gendy_sfr.h	/^	float amplitude;$/;"	m	class:breakpoint
 amplitude_pull	gendy_sfr.h	/^	float duration_pull, amplitude_pull;$/;"	m	class:gendy_waveform
@@ -34,7 +34,7 @@ elastic_move	gendy_sfr.cpp	/^void breakpoint::elastic_move(float h_step, float v
 gauss	gendy_sfr.cpp	/^double gauss() {$/;"	f
 gendy	main.cpp	/^class gendy:  public flext_dsp {$/;"	c	file:
 gendy	main.cpp	/^gendy::gendy() {$/;"	f	class:gendy
-gendy_count	main.cpp	/^		static gendy_count = 0;$/;"	m	class:gendy	file:
+gendy_count	main.cpp	/^		static unsigned int gendy_count = 0;$/;"	m	class:gendy	file:
 gendy_waveform	gendy_sfr.cpp	/^gendy_waveform::gendy_waveform() {$/;"	f	class:gendy_waveform
 gendy_waveform	gendy_sfr.h	/^class gendy_waveform$/;"	c
 generate_from_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::generate_from_breakpoints() {$/;"	f	class:gendy_waveform

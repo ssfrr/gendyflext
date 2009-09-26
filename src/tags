@@ -26,7 +26,6 @@ center_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::center_breakpoints() {$/
 center_dur	gendy_sfr.h	/^	unsigned int center_dur;$/;"	m	class:breakpoint
 class_setup	main.cpp	/^void gendy::class_setup(t_classid thisclass) {$/;"	f	class:gendy
 constrain_endpoints	gendy_sfr.h	/^	bool constrain_endpoints;$/;"	m	class:gendy_waveform
-copy_index	gendy_sfr.h	/^	unsigned int copy_index;$/;"	m	class:gendy_waveform
 current_wavelength	gendy_sfr.h	/^	unsigned int current_wavelength;$/;"	m	class:gendy_waveform
 debug	main.cpp	/^		bool debug;$/;"	m	class:gendy	file:
 duration	gendy_sfr.h	/^	unsigned int duration;$/;"	m	class:breakpoint
@@ -43,7 +42,7 @@ get_amplitude	gendy_sfr.cpp	/^float breakpoint::get_amplitude() {$/;"	f	class:br
 get_center_amplitude	gendy_sfr.cpp	/^float breakpoint::get_center_amplitude() {$/;"	f	class:breakpoint
 get_center_duration	gendy_sfr.cpp	/^unsigned int breakpoint::get_center_duration() {$/;"	f	class:breakpoint
 get_duration	gendy_sfr.cpp	/^unsigned int breakpoint::get_duration() {$/;"	f	class:breakpoint
-get_wave_data	gendy_sfr.cpp	/^int gendy_waveform::get_wave_data(float *buffer, unsigned int n) {$/;"	f	class:gendy_waveform
+get_wave_data	gendy_sfr.cpp	/^unsigned int gendy_waveform::get_wave_data(float *buffer, unsigned int n) {$/;"	f	class:gendy_waveform
 id	main.cpp	/^		unsigned int id;$/;"	m	class:gendy	file:
 interpolation_type	gendy_sfr.h	/^	unsigned int interpolation_type;$/;"	m	class:gendy_waveform
 m_signal	main.cpp	/^void gendy::m_signal(int n, float *const *in, float *const *out) {$/;"	f	class:gendy

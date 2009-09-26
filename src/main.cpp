@@ -118,12 +118,7 @@ void gendy::class_setup(t_classid thisclass) {
 void gendy::m_signal(int n, float *const *in, float *const *out) {
 	
 	// point outs to the output signal vector
-	float *outs = out[0];
-	int filled_index = 0;
-	int retreived_samples = 0;
-	
-	waveform.get_wave_data(outs, n);
-	}
+	waveform.get_wave_data(out[0], n);
 }
 
 // Message handling functions

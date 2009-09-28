@@ -17,6 +17,10 @@ using namespace std;
 #error You need at least flext version 0.5.0
 #endif
 
+// gendy~ version 0.0.1:
+const int GENDY_MAJ = 0;
+const int GENDY_MIN = 0;
+const int GENDY_REV = 1;
 
 // A flext dsp external ("tilde object") inherits from the class flext_dsp 
 class gendy:  public flext_dsp {
@@ -43,6 +47,7 @@ class gendy:  public flext_dsp {
 		void set_interpolation_spline();
 		void set_interpolation_sinc();
 		void set_debug(int new_debug);
+		void set_outbuf(short argc, t_atom *argv);
 
 	private:	
 		gendy_waveform waveform;
@@ -51,6 +56,12 @@ class gendy:  public flext_dsp {
 		static unsigned int gendy_count;
 		// instance ID
 		unsigned int id;
+
+		// waveform display buffer variables
+		buffer *display_buf;
+		t_symbol *display_bufname;
+		bool display;
+		int display_refresh;
 		
 		// Internal class methods
 		static void class_setup(t_classid thisclass);
@@ -68,6 +79,9 @@ class gendy:  public flext_dsp {
 		FLEXT_CALLBACK(set_interpolation_spline)
 		FLEXT_CALLBACK(set_interpolation_sinc)
 		FLEXT_CALLBACK_I(set_debug)
+		FLEXT_CALLBACK(set_outbuf)
+		FLEXT_CALLBACK_F(set_outbuf)
+		FLEXT_CALLBACK_S(set_outbuf)
 };
 unsigned int gendy::gendy_count = 0;
 bool gendy::debug = true;
@@ -80,6 +94,12 @@ gendy::gendy() {
 		post("gendy~ #%d: Constructor initiated", id);
 	AddInAnything("control input");	// control input
 	AddOutSignal("audio out");		  // audio output
+
+	display_buf = NULL;
+	display = false;
+	//default to displaying every 5 cycles
+	display_refresh = 5;
+
 	if(debug)
 		post("gendy~ #%d: Constructor terminated", id);
 }
@@ -108,6 +128,7 @@ void gendy::class_setup(t_classid thisclass) {
 	FLEXT_CADDMETHOD_(thisclass, 0, "spline", set_interpolation_spline);
 	FLEXT_CADDMETHOD_(thisclass, 0, "sinc", set_interpolation_sinc);
 	FLEXT_CADDMETHOD_(thisclass, 0, "debug", set_debug);
+	FLEXT_CADDMETHOD_(thisclass, 0, "display", set_outbuf);
 	post("--- gendy~ by Spencer Russell ---");
 	if(debug)
 		post("Class constructor ending");
@@ -172,6 +193,41 @@ void gendy::set_debug(int new_debug) {
 		debug = true;
 	else
 		debug = false;
+}
+
+void gendy::set_outbuf() {
+	// no arguement toggles waveform display
+	display = !display;
+}
+
+void gendy::set_outbuf(int arg) {
+	// zero turns display off
+	if(arg == 0)
+		display = false;
+	// non-zero numerical argument sets display rate, turns display on
+	else {
+		display = true;
+		display_refresh = arg;
+	}
+}
+
+void gendy::set_outbuf(t_symbol *bufname) {
+	// symbol argument, set output buffer
+	// TODO: better error reporting
+	display_bufname = bufname; 
+	// delete existing buffer reference
+	if(display_buf) {
+		delete display_buf;
+	}
+	display_buf = new buffer(bufname);
+	if(!display_buf->Ok()) {
+		post("gendy~: buffer not valid");
+		delete display_buf;
+		display_buf = NULL;
+		display_bufname = NULL;
+	}
+	else 
+		display = true;
 }
 
 // private class methods

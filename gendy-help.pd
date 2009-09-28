@@ -1,38 +1,36 @@
 #N canvas 560 0 815 963 10;
-#X obj 142 513 gendy~;
-#X obj 132 601 dac~;
-#X obj 143 554 *~ 0;
-#X obj 247 462 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 1800 1;
+#X obj 140 760 gendy~;
+#X obj 130 848 dac~;
+#X obj 141 801 *~ 0;
+#X obj 265 770 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 0 1;
 #X obj 82 61 hsl 128 15 50 2000 1 0 empty empty Freq -2 -8 0 10 -262144
--1 -1 12700 1;
+-1 -1 2800 1;
 #X msg 132 120 h_pull \$1;
 #X msg 173 174 v_pull \$1;
 #X obj 135 97 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 12700 1;
+-1 -1 4400 1;
 #X obj 176 154 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
+-1 -1 6200 1;
 #X obj 198 203 hsl 128 15 0 30 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
+-1 -1 4800 1;
 #X obj 239 260 hsl 128 15 0 0.25 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
+-1 -1 5700 1;
 #X msg 195 226 h_step \$1;
 #X msg 236 280 v_step \$1;
 #X msg 266 398 breakpoints \$1;
 #X obj 269 336 hsl 128 15 1 20 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 10600 1;
+-1 -1 4900 1;
 #X obj 266 356 int;
 #X floatatom 267 378 5 0 0 0 - - -;
 #N canvas 0 0 450 300 (subpatch) 0;
-#X array waveform 400 float 2;
-#X coords 0 1 400 -1 200 140 1;
+#X array waveform 500 float 2;
+#X coords 0 1 500 -1 200 140 1;
 #X restore 550 107 graph;
-#X obj 309 611 tabwrite~ waveform;
-#X obj 369 555 metro 100;
-#X obj 369 519 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
-1;
+#X msg 300 588 display waveform;
+#X msg 282 523 display 10;
+#X msg 303 554 display 0;
 #X connect 0 0 2 0;
-#X connect 0 0 18 0;
 #X connect 2 0 1 0;
 #X connect 2 0 1 1;
 #X connect 3 0 2 1;
@@ -49,5 +47,6 @@
 #X connect 14 0 15 0;
 #X connect 15 0 16 0;
 #X connect 16 0 13 0;
-#X connect 19 0 18 0;
-#X connect 20 0 19 0;
+#X connect 18 0 0 0;
+#X connect 19 0 0 0;
+#X connect 20 0 0 0;

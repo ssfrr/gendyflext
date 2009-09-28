@@ -6,6 +6,9 @@
 !_TAG_PROGRAM_VERSION	5.7	//
 CUBIC	gendy_sfr.h	/^enum { LINEAR, CUBIC, SPLINE, SINC };$/;"	e	enum:__anon1
 FLAT	gendy_sfr.h	/^enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };$/;"	e	enum:__anon2
+GENDY_MAJ	main.cpp	/^const int GENDY_MAJ = 0;$/;"	v
+GENDY_MIN	main.cpp	/^const int GENDY_MIN = 0;$/;"	v
+GENDY_REV	main.cpp	/^const int GENDY_REV = 1;$/;"	v
 LINEAR	gendy_sfr.h	/^enum { LINEAR, CUBIC, SPLINE, SINC };$/;"	e	enum:__anon1
 SAWTOOTH	gendy_sfr.h	/^enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };$/;"	e	enum:__anon2
 SINC	gendy_sfr.h	/^enum { LINEAR, CUBIC, SPLINE, SINC };$/;"	e	enum:__anon1
@@ -30,7 +33,19 @@ class_setup	main.cpp	/^void gendy::class_setup(t_classid thisclass) {$/;"	f	clas
 constrain_endpoints	gendy_sfr.h	/^	bool constrain_endpoints;$/;"	m	class:gendy_waveform
 current_wavelength	gendy_sfr.h	/^	unsigned int current_wavelength;$/;"	m	class:gendy_waveform
 debug	gendy_sfr.h	/^	bool debug;$/;"	m	class:gendy_waveform
-debug	main.cpp	/^		bool debug;$/;"	m	class:gendy	file:
+debug	main.cpp	/^		static bool debug;$/;"	m	class:gendy	file:
+debug	main.cpp	/^bool gendy::debug = true;$/;"	m	class:gendy	file:
+display	gendy_sfr.h	/^	bool display;$/;"	m	class:gendy_waveform
+display	main.cpp	/^		bool display;$/;"	m	class:gendy	file:
+display_buf	gendy_sfr.h	/^	float *display_buf;$/;"	m	class:gendy_waveform
+display_buf	main.cpp	/^		buffer *display_buf;$/;"	m	class:gendy	file:
+display_buf_size	gendy_sfr.h	/^	int display_buf_size;$/;"	m	class:gendy_waveform
+display_bufname	main.cpp	/^		t_symbol *display_bufname;$/;"	m	class:gendy	file:
+display_rate	gendy_sfr.h	/^	int display_rate;$/;"	m	class:gendy_waveform
+display_rate	main.cpp	/^		int display_rate;$/;"	m	class:gendy	file:
+display_toggle	gendy_sfr.cpp	/^void gendy_waveform::display_toggle() {$/;"	f	class:gendy_waveform
+display_toggle	gendy_sfr.cpp	/^void gendy_waveform::display_toggle(bool state) {$/;"	f	class:gendy_waveform
+display_waveform	gendy_sfr.cpp	/^void gendy_waveform::display_waveform() {$/;"	f	class:gendy_waveform
 duration	gendy_sfr.h	/^	unsigned int duration;$/;"	m	class:breakpoint
 duration_pull	gendy_sfr.h	/^	float duration_pull, amplitude_pull;$/;"	m	class:gendy_waveform
 elastic_move	gendy_sfr.cpp	/^void breakpoint::elastic_move(float h_step, float v_step, $/;"	f	class:breakpoint
@@ -65,6 +80,8 @@ set_center_amplitude	gendy_sfr.cpp	/^void breakpoint::set_center_amplitude(float
 set_center_duration	gendy_sfr.cpp	/^void breakpoint::set_center_duration(unsigned int new_duration) {$/;"	f	class:breakpoint
 set_constrain_endpoints	gendy_sfr.cpp	/^void gendy_waveform::set_constrain_endpoints(bool constrain) {$/;"	f	class:gendy_waveform
 set_debug	main.cpp	/^void gendy::set_debug(int new_debug) {$/;"	f	class:gendy
+set_display_buffer	gendy_sfr.cpp	/^void gendy_waveform::set_display_buffer(float *buf, int size) {$/;"	f	class:gendy_waveform
+set_display_rate	gendy_sfr.cpp	/^void gendy_waveform::set_display_rate(int rate) {$/;"	f	class:gendy_waveform
 set_duration	gendy_sfr.cpp	/^void breakpoint::set_duration(unsigned int new_duration) {$/;"	f	class:breakpoint
 set_duration_pull	gendy_sfr.cpp	/^void gendy_waveform::set_duration_pull(float new_pull) {$/;"	f	class:gendy_waveform
 set_frequency	main.cpp	/^void gendy::set_frequency(float new_freq) {$/;"	f	class:gendy
@@ -79,6 +96,7 @@ set_interpolation_spline	main.cpp	/^void gendy::set_interpolation_spline() {$/;"
 set_max_duration	gendy_sfr.cpp	/^void breakpoint::set_max_duration(unsigned int new_max) {$/;"	f	class:breakpoint
 set_num_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::set_num_breakpoints(unsigned int new_size) {$/;"	f	class:gendy_waveform
 set_num_breakpoints	main.cpp	/^void gendy::set_num_breakpoints(float num_breakpoints) {$/;"	f	class:gendy
+set_outbuf	main.cpp	/^void gendy::set_outbuf(short argc, t_atom *argv) {$/;"	f	class:gendy
 set_position	gendy_sfr.cpp	/^void breakpoint::set_position(unsigned int new_duration, float new_amplitude) {$/;"	f	class:breakpoint
 set_step_height	gendy_sfr.cpp	/^void gendy_waveform::set_step_height(float new_height) {$/;"	f	class:gendy_waveform
 set_step_width	gendy_sfr.cpp	/^void gendy_waveform::set_step_width(float new_width) {$/;"	f	class:gendy_waveform

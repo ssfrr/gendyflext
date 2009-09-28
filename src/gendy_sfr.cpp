@@ -153,6 +153,10 @@ gendy_waveform::gendy_waveform() {
 	set_avg_wavelength(147);
 	set_interpolation(LINEAR);
 	set_waveshape(FLAT);
+	display_buf = NULL;
+	display_buf_size = 0;
+	display_rate = 5;
+	display = false;
 
 	// start with a single breakpoint that spans the whole wavelength
 	breakpoint_list.push_front(breakpoint(147,0,147,0));
@@ -225,6 +229,34 @@ void gendy_waveform::set_constrain_endpoints(bool constrain) {
 	constrain_endpoints = constrain;
 }
 
+void gendy_waveform::display_toggle() {
+	display = !display;
+}
+
+void gendy_waveform::display_toggle(bool state) {
+	display = state;
+}
+
+void gendy_waveform::set_display_rate(int rate) {
+	if(rate > 0)
+		display_rate = rate;
+}
+
+void gendy_waveform::set_display_buffer(float *buf, int size) {
+	display_buf = buf;
+	display_buf_size = size;
+}
+
+void gendy_waveform::display_waveform() {
+	static int display_count = 0;
+	int n = 0;
+	if(++display_count >= display_rate) {
+		while(n < current_wavelength && n < display_buf_size)
+			display_buf[n] = wave_samples[n++];
+		display_count = 0;
+		//TODO set dirty flag on output buffer
+	}
+}
 // set new positions for all the breakpoints and update current_wavelength
 // NB: could be easily modified and cleaned up a little if next_first was 
 // stored in the last spot in the breakpoint list, instead of as a separate
@@ -289,6 +321,8 @@ void gendy_waveform::generate_from_breakpoints() {
 		}
 	}
 	// TODO: implement other interpolations
+	if(display)
+		display_waveform();
 }
 
 // find the biggest space between breakpoints and add a new one

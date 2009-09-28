@@ -73,6 +73,13 @@ class gendy_waveform
 	float duration_pull, amplitude_pull;
 	bool debug;
 
+	// buffer to copy to for waveform display
+	float *display_buf;
+	int display_buf_size;
+	// waveform display is written every display_rate samples
+	int display_rate;
+	bool display;
+
 	void move_breakpoints();
 	void generate_from_breakpoints();
 	void add_breakpoint();
@@ -94,6 +101,14 @@ class gendy_waveform
 	void set_duration_pull(float new_pull);
 	void set_constrain_endpoints(bool constrain);
 	unsigned int get_wave_data(float *buffer, unsigned int n);
+	//
+	// display_toggle with no args flips state
+	void display_toggle();
+	void display_toggle(bool state);
+	void set_display_rate(int rate);
+	void set_display_buffer(float *buf, int size);
+	void display_waveform();
+
 
 
 }; //end gendy_waveform class def

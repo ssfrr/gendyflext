@@ -61,7 +61,7 @@ class gendy:  public flext_dsp {
 		buffer *display_buf;
 		t_symbol *display_bufname;
 		bool display;
-		int display_refresh;
+		int display_rate;
 		
 		// Internal class methods
 		static void class_setup(t_classid thisclass);
@@ -79,9 +79,7 @@ class gendy:  public flext_dsp {
 		FLEXT_CALLBACK(set_interpolation_spline)
 		FLEXT_CALLBACK(set_interpolation_sinc)
 		FLEXT_CALLBACK_I(set_debug)
-		FLEXT_CALLBACK(set_outbuf)
-		FLEXT_CALLBACK_F(set_outbuf)
-		FLEXT_CALLBACK_S(set_outbuf)
+		FLEXT_CALLBACK_V(set_outbuf)
 };
 unsigned int gendy::gendy_count = 0;
 bool gendy::debug = true;
@@ -98,7 +96,7 @@ gendy::gendy() {
 	display_buf = NULL;
 	display = false;
 	//default to displaying every 5 cycles
-	display_refresh = 5;
+	display_rate = 5;
 
 	if(debug)
 		post("gendy~ #%d: Constructor terminated", id);
@@ -141,8 +139,6 @@ void gendy::class_setup(t_classid thisclass) {
 //  These are arrays of signal vectors(in is a pointer to const pointer to float)
 
 void gendy::m_signal(int n, float *const *in, float *const *out) {
-	
-	// point outs to the output signal vector
 	waveform.get_wave_data(out[0], n);
 }
 
@@ -195,39 +191,39 @@ void gendy::set_debug(int new_debug) {
 		debug = false;
 }
 
-void gendy::set_outbuf() {
-	// no arguement toggles waveform display
-	display = !display;
-}
+// TODO let flext take care of buffer setting argument checking?
 
-void gendy::set_outbuf(int arg) {
-	// zero turns display off
-	if(arg == 0)
-		display = false;
-	// non-zero numerical argument sets display rate, turns display on
-	else {
-		display = true;
-		display_refresh = arg;
-	}
-}
-
-void gendy::set_outbuf(t_symbol *bufname) {
-	// symbol argument, set output buffer
-	// TODO: better error reporting
-	display_bufname = bufname; 
-	// delete existing buffer reference
-	if(display_buf) {
-		delete display_buf;
-	}
-	display_buf = new buffer(bufname);
-	if(!display_buf->Ok()) {
-		post("gendy~: buffer not valid");
-		delete display_buf;
-		display_buf = NULL;
-		display_bufname = NULL;
-	}
-	else 
-		display = true;
+void gendy::set_outbuf(short argc, t_atom *argv) {
+	if(argc == 0)
+		// no argument toggles waveform display
+		waveform.display_toggle();
+	else if(argc == 1)
+		if(IsFloat(argv[0]))
+			if(GetFloat(argv[0]) == 0)
+				// zero turns display off
+				waveform.display_toggle(false);
+			else {
+				// non-zero numerical argument sets display rate, turns display on
+				waveform.display_toggle(true);
+				waveform.set_display_rate(GetFloat(argv[0]));
+			}
+		else if(IsSymbol(argv[0])) {
+			// symbol argument, set output buffer
+			// TODO: better error reporting
+			// delete existing buffer reference
+			if(display_buf) {
+				delete display_buf;
+			}
+			display_buf = new buffer(GetSymbol(argv[0]));
+			if(!display_buf->Ok()) {
+				post("gendy~: buffer not valid");
+				delete display_buf;
+				display_buf = NULL;
+			}
+			else 
+				waveform.set_display_buffer(display_buf->Data(), 
+						display_buf->Frames());
+		}
 }
 
 // private class methods

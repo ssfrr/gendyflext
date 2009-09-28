@@ -13,10 +13,12 @@ SINE	gendy_sfr.h	/^enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };$/;"	e	enum:_
 SPLINE	gendy_sfr.h	/^enum { LINEAR, CUBIC, SPLINE, SINC };$/;"	e	enum:__anon1
 SQUARE	gendy_sfr.h	/^enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };$/;"	e	enum:__anon2
 TRIANGLE	gendy_sfr.h	/^enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };$/;"	e	enum:__anon2
+WAVE_BUFFER_INIT_SIZE	gendy_sfr.cpp	/^const int WAVE_BUFFER_INIT_SIZE = 441000;$/;"	v
 add_breakpoint	gendy_sfr.cpp	/^void gendy_waveform::add_breakpoint() {$/;"	f	class:gendy_waveform
 amplitude	gendy_sfr.h	/^	float amplitude;$/;"	m	class:breakpoint
 amplitude_pull	gendy_sfr.h	/^	float duration_pull, amplitude_pull;$/;"	m	class:gendy_waveform
 average_wavelength	gendy_sfr.h	/^	unsigned int average_wavelength;$/;"	m	class:gendy_waveform
+breakpoint	gendy_sfr.cpp	/^breakpoint::breakpoint() {$/;"	f	class:breakpoint
 breakpoint	gendy_sfr.cpp	/^breakpoint::breakpoint(unsigned int duration, float amplitude) {$/;"	f	class:breakpoint
 breakpoint	gendy_sfr.cpp	/^breakpoint::breakpoint(unsigned int duration, float amplitude,$/;"	f	class:breakpoint
 breakpoint	gendy_sfr.h	/^class breakpoint$/;"	c
@@ -27,6 +29,7 @@ center_dur	gendy_sfr.h	/^	unsigned int center_dur;$/;"	m	class:breakpoint
 class_setup	main.cpp	/^void gendy::class_setup(t_classid thisclass) {$/;"	f	class:gendy
 constrain_endpoints	gendy_sfr.h	/^	bool constrain_endpoints;$/;"	m	class:gendy_waveform
 current_wavelength	gendy_sfr.h	/^	unsigned int current_wavelength;$/;"	m	class:gendy_waveform
+debug	gendy_sfr.h	/^	bool debug;$/;"	m	class:gendy_waveform
 debug	main.cpp	/^		bool debug;$/;"	m	class:gendy	file:
 duration	gendy_sfr.h	/^	unsigned int duration;$/;"	m	class:breakpoint
 duration_pull	gendy_sfr.h	/^	float duration_pull, amplitude_pull;$/;"	m	class:gendy_waveform
@@ -34,7 +37,8 @@ elastic_move	gendy_sfr.cpp	/^void breakpoint::elastic_move(float h_step, float v
 gauss	gendy_sfr.cpp	/^double gauss() {$/;"	f
 gendy	main.cpp	/^class gendy:  public flext_dsp {$/;"	c	file:
 gendy	main.cpp	/^gendy::gendy() {$/;"	f	class:gendy
-gendy_count	main.cpp	/^		static unsigned int gendy_count = 0;$/;"	m	class:gendy	file:
+gendy_count	main.cpp	/^		static unsigned int gendy_count;$/;"	m	class:gendy	file:
+gendy_count	main.cpp	/^unsigned int gendy::gendy_count = 0;$/;"	m	class:gendy	file:
 gendy_waveform	gendy_sfr.cpp	/^gendy_waveform::gendy_waveform() {$/;"	f	class:gendy_waveform
 gendy_waveform	gendy_sfr.h	/^class gendy_waveform$/;"	c
 generate_from_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::generate_from_breakpoints() {$/;"	f	class:gendy_waveform
@@ -48,7 +52,7 @@ interpolation_type	gendy_sfr.h	/^	unsigned int interpolation_type;$/;"	m	class:g
 m_signal	main.cpp	/^void gendy::m_signal(int n, float *const *in, float *const *out) {$/;"	f	class:gendy
 max_duration	gendy_sfr.h	/^	unsigned int max_duration;$/;"	m	class:breakpoint
 move_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::move_breakpoints() {$/;"	f	class:gendy_waveform
-next_first	gendy_sfr.h	/^	breakpoint *next_first;$/;"	m	class:gendy_waveform
+next_first	gendy_sfr.h	/^	breakpoint next_first;$/;"	m	class:gendy_waveform
 randf	gendy_sfr.cpp	/^double randf() {$/;"	f
 remove_breakpoint	gendy_sfr.cpp	/^void gendy_waveform::remove_breakpoint() {$/;"	f	class:gendy_waveform
 reset_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::reset_breakpoints() {$/;"	f	class:gendy_waveform
@@ -59,14 +63,14 @@ set_avg_wavelength	gendy_sfr.cpp	/^void gendy_waveform::set_avg_wavelength(unsig
 set_center	gendy_sfr.cpp	/^void breakpoint::set_center(unsigned int new_duration, float new_amplitude) {$/;"	f	class:breakpoint
 set_center_amplitude	gendy_sfr.cpp	/^void breakpoint::set_center_amplitude(float new_amplitude) {$/;"	f	class:breakpoint
 set_center_duration	gendy_sfr.cpp	/^void breakpoint::set_center_duration(unsigned int new_duration) {$/;"	f	class:breakpoint
-set_constrain_endpoints	gendy_sfr.cpp	/^void set_constrain_endpoints(bool constrain) {$/;"	f
+set_constrain_endpoints	gendy_sfr.cpp	/^void gendy_waveform::set_constrain_endpoints(bool constrain) {$/;"	f	class:gendy_waveform
 set_debug	main.cpp	/^void gendy::set_debug(int new_debug) {$/;"	f	class:gendy
 set_duration	gendy_sfr.cpp	/^void breakpoint::set_duration(unsigned int new_duration) {$/;"	f	class:breakpoint
 set_duration_pull	gendy_sfr.cpp	/^void gendy_waveform::set_duration_pull(float new_pull) {$/;"	f	class:gendy_waveform
 set_frequency	main.cpp	/^void gendy::set_frequency(float new_freq) {$/;"	f	class:gendy
 set_h_pull	main.cpp	/^void gendy::set_h_pull(float new_pull) {$/;"	f	class:gendy
 set_h_step	main.cpp	/^void gendy::set_h_step(float new_stepsize) {$/;"	f	class:gendy
-set_interpolation	gendy_sfr.cpp	/^void gendy_waveform::set_interpolation(unsigned int new_interpolation) {$/;"	f	class:gendy_waveform
+set_interpolation	gendy_sfr.cpp	/^void gendy_waveform::set_interpolation(int new_interpolation) {$/;"	f	class:gendy_waveform
 set_interpolation	main.cpp	/^void gendy::set_interpolation(int new_interpolation) {$/;"	f	class:gendy
 set_interpolation_cubic	main.cpp	/^void gendy::set_interpolation_cubic() {$/;"	f	class:gendy
 set_interpolation_lin	main.cpp	/^void gendy::set_interpolation_lin() {$/;"	f	class:gendy
@@ -83,8 +87,9 @@ set_v_step	main.cpp	/^void gendy::set_v_step(float new_stepsize) {$/;"	f	class:g
 set_waveshape	gendy_sfr.cpp	/^void gendy_waveform::set_waveshape(unsigned int new_waveshape) {$/;"	f	class:gendy_waveform
 step_height	gendy_sfr.h	/^	float step_width, step_height;$/;"	m	class:gendy_waveform
 step_width	gendy_sfr.h	/^	float step_width, step_height;$/;"	m	class:gendy_waveform
+wave_buffer_size	gendy_sfr.h	/^	unsigned int wave_buffer_size;$/;"	m	class:gendy_waveform
 wave_samples	gendy_sfr.h	/^	float *wave_samples;$/;"	m	class:gendy_waveform
-waveform	main.cpp	/^		gendy_waveform *waveform;$/;"	m	class:gendy	file:
+waveform	main.cpp	/^		gendy_waveform waveform;$/;"	m	class:gendy	file:
 waveshape	gendy_sfr.h	/^	unsigned int waveshape;$/;"	m	class:gendy_waveform
 ~gendy	main.cpp	/^gendy::~gendy() {$/;"	f	class:gendy
 ~gendy_waveform	gendy_sfr.cpp	/^gendy_waveform::~gendy_waveform() {$/;"	f	class:gendy_waveform

@@ -30,26 +30,6 @@ class gendy:  public flext_dsp {
 	protected:
 		// here we declare the virtual DSP function
 		virtual void m_signal(int n, float *const *in, float *const *out);
-	private:	
-		gendy_waveform waveform;
-		bool debug;
-		// class-wide variable to keep track of how many objects exist
-		static unsigned int gendy_count;
-		// instance ID
-		unsigned int id;
-		
-		// register the callbacks, and tell flext their calling format
-		FLEXT_CALLBACK_F(set_frequency)
-		FLEXT_CALLBACK_I(set_num_breakpoints)
-		FLEXT_CALLBACK_F(set_h_step)
-		FLEXT_CALLBACK_F(set_v_step)
-		FLEXT_CALLBACK_F(set_h_pull)
-		FLEXT_CALLBACK_F(set_v_pull)
-		FLEXT_CALLBACK(set_interpolation_lin)
-		FLEXT_CALLBACK(set_interpolation_cubic)
-		FLEXT_CALLBACK(set_interpolation_spline)
-		FLEXT_CALLBACK(set_interpolation_sinc)
-		FLEXT_CALLBACK_I(set_debug)
 
 		// Message handling functions
 		void set_frequency(float new_freq);
@@ -64,11 +44,33 @@ class gendy:  public flext_dsp {
 		void set_interpolation_sinc();
 		void set_debug(int new_debug);
 
+	private:	
+		gendy_waveform waveform;
+		static bool debug;
+		// class-wide variable to keep track of how many objects exist
+		static unsigned int gendy_count;
+		// instance ID
+		unsigned int id;
+		
 		// Internal class methods
 		static void class_setup(t_classid thisclass);
 		void set_interpolation(int interpolation);
+
+		// register the callbacks, and tell flext their calling format
+		FLEXT_CALLBACK_F(set_frequency)
+		FLEXT_CALLBACK_I(set_num_breakpoints)
+		FLEXT_CALLBACK_F(set_h_step)
+		FLEXT_CALLBACK_F(set_v_step)
+		FLEXT_CALLBACK_F(set_h_pull)
+		FLEXT_CALLBACK_F(set_v_pull)
+		FLEXT_CALLBACK(set_interpolation_lin)
+		FLEXT_CALLBACK(set_interpolation_cubic)
+		FLEXT_CALLBACK(set_interpolation_spline)
+		FLEXT_CALLBACK(set_interpolation_sinc)
+		FLEXT_CALLBACK_I(set_debug)
 };
 unsigned int gendy::gendy_count = 0;
+bool gendy::debug = true;
 
 // object class constructor(run at each gendy object creation)
 gendy::gendy() {
@@ -78,8 +80,6 @@ gendy::gendy() {
 		post("gendy~ #%d: Constructor initiated", id);
 	AddInAnything("control input");	// control input
 	AddOutSignal("audio out");		  // audio output
-	// TODO: error checking for memory allocation
-	debug = false;
 	if(debug)
 		post("gendy~ #%d: Constructor terminated", id);
 }
@@ -95,6 +95,8 @@ gendy::~gendy() {
 void gendy::class_setup(t_classid thisclass) {
 	// associate methods with incoming messages on inlet 0
 	// numerical input is taken as frequency
+	if(debug)
+		post("Class constructor beginning");
 	FLEXT_CADDMETHOD(thisclass, 0, set_frequency);
 	FLEXT_CADDMETHOD_(thisclass, 0, "breakpoints", set_num_breakpoints);
 	FLEXT_CADDMETHOD_(thisclass, 0, "h_step", set_h_step);
@@ -107,6 +109,8 @@ void gendy::class_setup(t_classid thisclass) {
 	FLEXT_CADDMETHOD_(thisclass, 0, "sinc", set_interpolation_sinc);
 	FLEXT_CADDMETHOD_(thisclass, 0, "debug", set_debug);
 	post("--- gendy~ by Spencer Russell ---");
+	if(debug)
+		post("Class constructor ending");
 }
 
 // Now we define our DSP function. It gets these arguments:

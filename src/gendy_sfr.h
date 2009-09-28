@@ -25,6 +25,7 @@ class breakpoint
 	unsigned int max_duration;
 
 	public:
+	breakpoint();
 	breakpoint(unsigned int duration, float amplitude);
 	breakpoint(unsigned int duration, float amplitude,
 			unsigned int center_dur, float center_amp);
@@ -48,6 +49,7 @@ class gendy_waveform
 {
 	// buffer containing the current cycle of the waveform
 	float *wave_samples;
+	unsigned int wave_buffer_size;
 	// average wavelength in samples. the wave grows and shrinks cycle to
 	// cycle depending on the motion of the breakpoints
 	unsigned int average_wavelength;
@@ -56,7 +58,7 @@ class gendy_waveform
 	// list of breakpoints
 	list<breakpoint> breakpoint_list;
 	// we store the first breakpoint of the next cycle for continuity
-	breakpoint *next_first;
+	breakpoint next_first;
 	// set the type of interpolation(see defines at top)
 	unsigned int interpolation_type;
 	// the waveshape that the breakpoints will gravitate to
@@ -69,6 +71,7 @@ class gendy_waveform
 	// the extent to which the duration and amplitude are pulled to match
 	// the waveshape. ranges from 0 to 1
 	float duration_pull, amplitude_pull;
+	bool debug;
 
 	void move_breakpoints();
 	void generate_from_breakpoints();
@@ -79,10 +82,11 @@ class gendy_waveform
 
 	public:
 	gendy_waveform();
+	~gendy_waveform();
 	//gendy_waveform(float freq);
 	void set_num_breakpoints(unsigned int new_size);
 	void set_avg_wavelength(unsigned int new_wavelength);
-	void set_interpolation(unsigned int new_interpolation);
+	void set_interpolation(int new_interpolation);
 	void set_waveshape(unsigned int new_waveshape);
 	void set_step_width(float new_width);
 	void set_step_height(float new_height);

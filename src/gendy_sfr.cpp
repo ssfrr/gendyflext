@@ -1,22 +1,37 @@
 // TODO:
 // check constructors/destructors/copy constructors/assignment
+// check waveform buffer resizing
 // add license stuff to header/implementation files
+// output waveform to given table every N cycles, where N is user-settable
+//
 
 #include "gendy_sfr.h"
 
 using namespace std;
 
+// wave buffer will be initialized large enough to hold 10
+// seconds of data at 44.1kHz
+const int WAVE_BUFFER_INIT_SIZE = 441000;
+
+breakpoint::breakpoint() {
+	duration = 0;
+	amplitude = 0;
+	center_dur = 0;
+	center_amp = 0;
+	max_duration = 0;
+}
+
 breakpoint::breakpoint(unsigned int duration, float amplitude) {
-	this.duration = duration;
-	this.amplitude = amplitude;
+	this->duration = duration;
+	this->amplitude = amplitude;
 }
 
 breakpoint::breakpoint(unsigned int duration, float amplitude,
 		unsigned int center_dur, float center_amp) {
-	this.duration = duration;
-	this.amplitude = amplitude;
-	this.center_dur = center_dur;
-	this.center_amp = center_amp;
+	this->duration = duration;
+	this->amplitude = amplitude;
+	this->center_dur = center_dur;
+	this->center_amp = center_amp;
 	max_duration = center_dur * 10;
 }
 
@@ -37,11 +52,15 @@ breakpoint::breakpoint(unsigned int duration, float amplitude,
 //
 void breakpoint::elastic_move(float h_step, float v_step, 
 		float h_pull, float v_pull) {
+	long int old_duration = static_cast<long int>(duration);
 	long int new_duration;
 	float new_amplitude;
 
-	new_duration = duration + round((1.0 - h_pull) * h_step * gauss() +
-		(h_pull * (center_dur - duration)));
+	new_duration = old_duration + round(h_step * 
+			(h_pull * (center_dur - old_duration) + 
+			(1.0 - h_pull) * gauss() * center_dur));
+	/*new_duration = old_duration + round((1.0 - h_pull) * h_step * gauss() +
+		(h_pull * (center_dur - old_duration))); */
 	// set mirror boundaries on new_duration
 	do {
 		if(new_duration > max_duration)
@@ -50,8 +69,11 @@ void breakpoint::elastic_move(float h_step, float v_step,
 			new_duration = -new_duration;
 	} while (new_duration < 0 || new_duration > max_duration);
 	
-	new_amplitude = amplitude + (1 - v_pull) * v_step * gauss() +
-		v_pull * (center_amp - amplitude);
+	new_amplitude = amplitude + v_step *
+			(v_pull * (center_amp - amplitude) +
+			(1.0 - v_pull) * gauss());
+	/*new_amplitude = amplitude + (1 - v_pull) * v_step * gauss() +
+		v_pull * (center_amp - amplitude);*/
 	// set mirror boundaries on new_amplitude
 	do {
 		if(new_amplitude > 1)
@@ -94,6 +116,7 @@ void breakpoint::set_center(unsigned int new_duration, float new_amplitude) {
 	//TODO: argument sanitization
 	center_dur= new_duration;
 	center_amp = new_amplitude;
+	max_duration = new_duration * 10;
 }
 
 void breakpoint::set_max_duration(unsigned int new_max) {
@@ -119,6 +142,8 @@ float breakpoint::get_center_amplitude() {
 // gendy_waveform class constructor with all default arguments
 gendy_waveform::gendy_waveform() {
 	//initialize variables to defaults
+	wave_samples = new float[WAVE_BUFFER_INIT_SIZE];
+	wave_buffer_size = WAVE_BUFFER_INIT_SIZE;
 	step_width = 30;
 	step_height = 0.1;
 	duration_pull = 0.7;
@@ -126,17 +151,13 @@ gendy_waveform::gendy_waveform() {
 	constrain_endpoints = true;
 	// set the average wavelength for 300 Hz at 44.1 kHz
 	set_avg_wavelength(147);
-	set_interpolation_type(LINEAR);
+	set_interpolation(LINEAR);
 	set_waveshape(FLAT);
-	copy_index = 0;
-
-	// start with a buffer that's 10 times as long as it needs to be for the
-	// average wavelength
-	wave_samples = new float[average_wavelength * 10];
 
 	// start with a single breakpoint that spans the whole wavelength
-	breakpoint_list.push_front(new breakpoint(147,0,147,0));
-	next_first = new breakpoint(147,0,147,0);
+	breakpoint_list.push_front(breakpoint(147,0,147,0));
+	next_first.set_position(147,0);
+	next_first.set_center(147,0);
 
 	set_num_breakpoints(8);
 	reset_breakpoints();
@@ -145,7 +166,6 @@ gendy_waveform::gendy_waveform() {
 
 gendy_waveform::~gendy_waveform() {
 	delete[] wave_samples;
-	delete next_first;
 }
 
 void gendy_waveform::set_num_breakpoints(unsigned int new_size) {
@@ -157,11 +177,19 @@ void gendy_waveform::set_num_breakpoints(unsigned int new_size) {
 }
 
 void gendy_waveform::set_avg_wavelength(unsigned int new_wavelength) {
+	// wave buffer needs to be at least 10 times the length of the average
+	// waveform. When frequency changes, re-allocate if the current buffer
+	// is too small
+	if(wave_buffer_size < 10 * new_wavelength) {
+		delete[] wave_samples;
+		wave_samples = new float[10 * wave_buffer_size];
+		wave_buffer_size = 10 * wave_buffer_size;
+	}
 	average_wavelength = new_wavelength;
 	center_breakpoints();
 }
 
-void gendy_waveform::set_interpolation(unsigned int new_interpolation) {
+void gendy_waveform::set_interpolation(int new_interpolation) {
 	interpolation_type = new_interpolation;
 }
 
@@ -178,11 +206,11 @@ void gendy_waveform::set_waveshape(unsigned int new_waveshape) {
 }
 
 void gendy_waveform::set_step_width(float new_width) {
-	step_width = new_step_width;
+	step_width = new_width;
 }
 
 void gendy_waveform::set_step_height(float new_height) {
-	step_height = new_step_height;
+	step_height = new_height;
 }
 
 void gendy_waveform::set_amplitude_pull(float new_pull) {
@@ -193,7 +221,7 @@ void gendy_waveform::set_duration_pull(float new_pull) {
 	duration_pull = new_pull;
 }
 
-void set_constrain_endpoints(bool constrain) {
+void gendy_waveform::set_constrain_endpoints(bool constrain) {
 	constrain_endpoints = constrain;
 }
 
@@ -205,8 +233,8 @@ void gendy_waveform::move_breakpoints() {
 	list<breakpoint>::iterator i;
 	unsigned int total_dur = 0;
 	// first we copy in the previously calculated first breakpoint 
-	breakpoint_list.begin()->set_duration(next_first->get_duration());
-	breakpoint_list.begin()->set_amplitude(next_first->get_amplitude());
+	breakpoint_list.begin()->set_duration(next_first.get_duration());
+	breakpoint_list.begin()->set_amplitude(next_first.get_amplitude());
 	total_dur += breakpoint_list.begin()->get_duration();
 	// calculate new values for all the rest of the breakpoints
 	for(i = ++breakpoint_list.begin(); i != breakpoint_list.end(); i++) {
@@ -214,7 +242,7 @@ void gendy_waveform::move_breakpoints() {
 		total_dur += i->get_duration();
 	}
 	// calculate new position for the first breakpoint in the next cycle
-	next_first->elastic_move(step_width, step_height, 
+	next_first.elastic_move(step_width, step_height, 
 			duration_pull, amplitude_pull);
 	current_wavelength = total_dur;
 }
@@ -241,7 +269,7 @@ void gendy_waveform::generate_from_breakpoints() {
 		current_amp = next->get_amplitude();
 		// for each breakpoint 
 		while(++next != breakpoint_list.end()) {
-			next_amplitude = next->get_amplitude();
+			next_amp = next->get_amplitude();
 			slope = (next_amp - current_amp) / current_dur;
 			for(unsigned int i = 0; i < current_dur; i++) {
 				// slower but no discontuinities
@@ -254,7 +282,7 @@ void gendy_waveform::generate_from_breakpoints() {
 			current_amp = next_amp;
 		}
 		// connect up with the first breakpoint of the next cycle
-		next_amp = next_first->amplitude;
+		next_amp = next_first.get_amplitude();
 		slope = (next_amp - current_amp) / current_dur;
 		for(unsigned int i = 0; i < current_dur; i++) {
 			wave_samples[i+offset] = current_amp + slope * i;
@@ -290,7 +318,7 @@ void gendy_waveform::add_breakpoint() {
 	// for insertion
 	if(longest_dur_breakpoint == --breakpoint_list.end()) {
 		new_amplitude = (longest_dur_breakpoint->get_amplitude() + 
-				next_first->get_amplitude()) / 2;
+				next_first.get_amplitude()) / 2;
 		longest_dur_breakpoint++;
 	}
 	else
@@ -298,7 +326,7 @@ void gendy_waveform::add_breakpoint() {
 				(++longest_dur_breakpoint)->get_amplitude()) / 2;
 	// insert the breakpoint in the list
 	breakpoint_list.insert(longest_dur_breakpoint, 
-			new breakpoint(new_duration, new_amplitude));
+			breakpoint(new_duration, new_amplitude));
 }
 
 // remove the breakpoint closest to its neighbors. breakpoints centers
@@ -336,16 +364,16 @@ void gendy_waveform::center_breakpoints() {
 	for(current = breakpoint_list.begin();
 			current != breakpoint_list.end(); current++) {
 		// evenly distribute the breakpoints along the waveform
-		current->set_center_duration(average_wavelength / num_breakpoints);
+		current->set_center_duration(average_wavelength / breakpoint_list.size());
 		current->set_max_duration(int(average_wavelength * 10 / 
-					num_breakpoints));
+					breakpoint_list.size()));
 
 		if(waveshape == FLAT)
 			current->set_center_amplitude(0);
 		else if(waveshape == SINE)
-			current->set_center_amplitude(sin(2 * M_PI * i / num_breakpoints));
+			current->set_center_amplitude(sin(2 * M_PI * i / breakpoint_list.size()));
 		else if(waveshape == SQUARE)
-			if((float(i) / num_breakpoints) > 0.5)
+			if((float(i) / breakpoint_list.size()) > 0.5)
 				current->set_center_amplitude(1);
 			else
 				current->set_center_amplitude(-1);
@@ -364,8 +392,8 @@ void gendy_waveform::reset_breakpoints() {
 			current != breakpoint_list.end(); current++)
 		current->set_position(current->get_center_duration(),
 				current->get_center_amplitude());
-	next_first->set_position(next_first->get_center_duration(),
-			next_first->get_center_amplitude());
+	next_first.set_position(next_first.get_center_duration(),
+			next_first.get_center_amplitude());
 }
 
 // copies the waveform into a buffer of size n until the buffer is full.  When

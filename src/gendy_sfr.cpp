@@ -2,7 +2,6 @@
 // check constructors/destructors/copy constructors/assignment
 // check waveform buffer resizing
 // add license stuff to header/implementation files
-// output waveform to given table every N cycles, where N is user-settable
 //
 
 #include "gendy_sfr.h"
@@ -255,7 +254,7 @@ void gendy_waveform::set_display_rate(int rate) {
 		display_rate = rate;
 }
 
-void gendy_waveform::set_display_buffer(flext_single::buffer *buf) {
+void gendy_waveform::set_display_buffer(flext::buffer *buf) {
 	display_buf = buf;
 }
 
@@ -266,16 +265,25 @@ void gendy_waveform::display_waveform() {
 
 	if(!display_buf || !display_buf->Ok()) {
 		print_log("gendy-sfr: Invalid Buffer", LOG_ERROR);
+		display = false;
 		return;
 	}
 
-	t_word *buf = display_buf->Data();
-	int bufsize = display_buf->Frames();
 	if(++display_count >= display_rate) {
+		flext::buffer::lock_t state = display_buf->Lock();
+		display_buf->Update();
+		// resize table to fit 1 wavelength
+		//display_buf->Frames(current_wavelength, false, false);
+		t_word *buf = display_buf->Data();
+		int bufsize = display_buf->Frames();
 		while(n < current_wavelength && n < bufsize)
 			buf[n].w_float = wave_samples[n++];
+		// zero out the rest of the buffer
+		while(n < bufsize)
+			buf[n++].w_float = 0;
 		display_count = 0;
 		display_buf->Dirty(true);
+		display_buf->Unlock(state);
 	}
 }
 #endif

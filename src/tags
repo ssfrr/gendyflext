@@ -42,7 +42,7 @@ debug	main.cpp	/^		static bool debug;$/;"	m	class:gendy	file:
 debug	main.cpp	/^bool gendy::debug = true;$/;"	m	class:gendy	file:
 display	gendy_sfr.h	/^	bool display;$/;"	m	class:gendy_waveform
 display	main.cpp	/^		bool display;$/;"	m	class:gendy	file:
-display_buf	gendy_sfr.h	/^	flext_single::buffer *display_buf;$/;"	m	class:gendy_waveform
+display_buf	gendy_sfr.h	/^	flext::buffer *display_buf;$/;"	m	class:gendy_waveform
 display_buf	main.cpp	/^		buffer *display_buf;$/;"	m	class:gendy	file:
 display_bufname	main.cpp	/^		t_symbol *display_bufname;$/;"	m	class:gendy	file:
 display_rate	gendy_sfr.h	/^	int display_rate;$/;"	m	class:gendy_waveform
@@ -85,7 +85,7 @@ set_center_amplitude	gendy_sfr.cpp	/^void breakpoint::set_center_amplitude(float
 set_center_duration	gendy_sfr.cpp	/^void breakpoint::set_center_duration(unsigned int new_duration) {$/;"	f	class:breakpoint
 set_constrain_endpoints	gendy_sfr.cpp	/^void gendy_waveform::set_constrain_endpoints(bool constrain) {$/;"	f	class:gendy_waveform
 set_debug	main.cpp	/^void gendy::set_debug(int new_debug) {$/;"	f	class:gendy
-set_display_buffer	gendy_sfr.cpp	/^void gendy_waveform::set_display_buffer(flext_single::buffer *buf) {$/;"	f	class:gendy_waveform
+set_display_buffer	gendy_sfr.cpp	/^void gendy_waveform::set_display_buffer(flext::buffer *buf) {$/;"	f	class:gendy_waveform
 set_display_rate	gendy_sfr.cpp	/^void gendy_waveform::set_display_rate(int rate) {$/;"	f	class:gendy_waveform
 set_duration	gendy_sfr.cpp	/^void breakpoint::set_duration(unsigned int new_duration) {$/;"	f	class:breakpoint
 set_duration_pull	gendy_sfr.cpp	/^void gendy_waveform::set_duration_pull(float new_pull) {$/;"	f	class:gendy_waveform

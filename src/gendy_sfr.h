@@ -85,7 +85,7 @@ class gendy_waveform
 
 #ifdef FLEXT_VERSION
 	// buffer to copy to for waveform display
-	flext_single::buffer *display_buf;
+	flext::buffer *display_buf;
 	// waveform display is written every display_rate cycles
 	int display_rate;
 	bool display;
@@ -117,7 +117,7 @@ class gendy_waveform
 	void display_toggle();
 	void display_toggle(bool state);
 	void set_display_rate(int rate);
-	void set_display_buffer(flext_single::buffer *buf);
+	void set_display_buffer(flext::buffer *buf);
 	void display_waveform();
 #endif
 }; //end gendy_waveform class def

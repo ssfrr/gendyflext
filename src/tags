@@ -72,6 +72,8 @@ m_signal	main.cpp	/^void gendy::m_signal(int n, float *const *in, float *const *
 max_duration	gendy_sfr.h	/^	unsigned int max_duration;$/;"	m	class:breakpoint
 move_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::move_breakpoints() {$/;"	f	class:gendy_waveform
 next_first	gendy_sfr.h	/^	breakpoint next_first;$/;"	m	class:gendy_waveform
+print_log	gendy_sfr.cpp	/^extern void print_log(const char *msg, float arg1, int level){$/;"	f
+print_log	gendy_sfr.cpp	/^extern void print_log(const char *msg, int arg1, int level){$/;"	f
 print_log	gendy_sfr.cpp	/^extern void print_log(const char *msg, int level){$/;"	f
 randf	gendy_sfr.cpp	/^double randf() {$/;"	f
 remove_breakpoint	gendy_sfr.cpp	/^void gendy_waveform::remove_breakpoint() {$/;"	f	class:gendy_waveform

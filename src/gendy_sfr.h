@@ -16,6 +16,9 @@
 #define LOG_LEVEL LOG_DEBUG
 
 extern void print_log(const char *msg, int level);
+extern void print_log(const char *msg, int arg1, int level);
+extern void print_log(const char *msg, unsigned int arg1, int level);
+extern void print_log(const char *msg, float arg1, int level);
 
 // define interpolation types
 enum { LINEAR, CUBIC, SPLINE, SINC };

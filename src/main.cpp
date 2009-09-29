@@ -91,6 +91,7 @@ gendy::gendy() {
 	if(debug)
 		post("gendy~ #%d: Constructor initiated", id);
 	AddInAnything("control input");	// control input
+	AddInAnything("frequency input");	// frequency input
 	AddOutSignal("audio out");		  // audio output
 
 	display_buf = NULL;
@@ -113,9 +114,9 @@ gendy::~gendy() {
 void gendy::class_setup(t_classid thisclass) {
 	// associate methods with incoming messages on inlet 0
 	// numerical input is taken as frequency
-	if(debug)
-		post("Class constructor beginning");
-	FLEXT_CADDMETHOD(thisclass, 0, set_frequency);
+	print_log("Class constructor beginning", LOG_DEBUG);
+	FLEXT_CADDMETHOD(thisclass, 1, set_frequency);
+	FLEXT_CADDMETHOD_(thisclass, 0, "freq", set_frequency);
 	FLEXT_CADDMETHOD_(thisclass, 0, "breakpoints", set_num_breakpoints);
 	FLEXT_CADDMETHOD_(thisclass, 0, "h_step", set_h_step);
 	FLEXT_CADDMETHOD_(thisclass, 0, "v_step", set_v_step);
@@ -127,9 +128,8 @@ void gendy::class_setup(t_classid thisclass) {
 	FLEXT_CADDMETHOD_(thisclass, 0, "sinc", set_interpolation_sinc);
 	FLEXT_CADDMETHOD_(thisclass, 0, "debug", set_debug);
 	FLEXT_CADDMETHOD_(thisclass, 0, "display", set_outbuf);
-	post("--- gendy~ by Spencer Russell ---");
-	if(debug)
-		post("Class constructor ending");
+	print_log("--- gendy~ by Spencer Russell ---", LOG_INFO);
+	print_log("Class constructor ending", LOG_DEBUG);
 }
 
 // Now we define our DSP function. It gets these arguments:
@@ -145,46 +145,57 @@ void gendy::m_signal(int n, float *const *in, float *const *out) {
 // Message handling functions
 
 void gendy::set_frequency(float new_freq) {
+	print_log("set_frequency(%f)", new_freq, LOG_DEBUG);
 	waveform.set_avg_wavelength(Samplerate() / new_freq);
 }
 
 void gendy::set_num_breakpoints(float num_breakpoints) {
+	print_log("set_num_breakpoints(%f)", num_breakpoints, LOG_DEBUG);
 	waveform.set_num_breakpoints(num_breakpoints);
 }
 
 void gendy::set_h_step(float new_stepsize) {
+	print_log("set_h_step(%f)", new_stepsize, LOG_DEBUG);
 	waveform.set_step_width(new_stepsize);
 }
 
 void gendy::set_v_step(float new_stepsize) {
+	print_log("set_v_step(%f)", new_stepsize, LOG_DEBUG);
 	waveform.set_step_height(new_stepsize);
 }
 
 void gendy::set_h_pull(float new_pull) {
-	waveform.set_amplitude_pull(new_pull);
-}
-
-void gendy::set_v_pull(float new_pull) {
+	print_log("set_h_pull(%f)", new_pull, LOG_DEBUG);
 	waveform.set_duration_pull(new_pull);
 }
 
+void gendy::set_v_pull(float new_pull) {
+	print_log("set_v_pull(%f)", new_pull, LOG_DEBUG);
+	waveform.set_amplitude_pull(new_pull);
+}
+
 void gendy::set_interpolation_lin() {
+	print_log("set_interpolation_lin()", LOG_DEBUG);
 	set_interpolation(LINEAR);
 }
 
 void gendy::set_interpolation_cubic() {
+	print_log("set_interpolation_cubic()", LOG_DEBUG);
 	set_interpolation(CUBIC);
 }
 
 void gendy::set_interpolation_spline() {
+	print_log("set_interpolation_spline()", LOG_DEBUG);
 	set_interpolation(SPLINE);
 }
 
 void gendy::set_interpolation_sinc() {
+	print_log("set_interpolation_sinc()", LOG_DEBUG);
 	set_interpolation(SINC);
 }
 
 void gendy::set_debug(int new_debug) {
+	print_log("set_debug(%d)", new_debug, LOG_DEBUG);
 	if(new_debug)
 		debug = true;
 	else

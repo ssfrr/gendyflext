@@ -216,13 +216,12 @@ void gendy::set_outbuf(short argc, t_atom *argv) {
 			}
 			display_buf = new buffer(GetSymbol(argv[0]));
 			if(!display_buf->Ok()) {
-				post("gendy~: buffer not valid");
+				print_log("gendy~: buffer not valid", LOG_ERROR);
 				delete display_buf;
 				display_buf = NULL;
 			}
 			else 
-				waveform.set_display_buffer(display_buf->Data(), 
-						display_buf->Frames());
+				waveform.set_display_buffer(display_buf); 
 		}
 }
 

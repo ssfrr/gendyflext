@@ -4,7 +4,18 @@
 #include <cstdlib>
 #include <cmath>
 
-using namespace std;
+#include <flext.h>
+
+//using namespace std;
+
+#define LOG_NONE 0
+#define LOG_ERROR 1
+#define LOG_INFO 2
+#define LOG_DEBUG 3
+
+#define LOG_LEVEL LOG_DEBUG
+
+extern void print_log(const char *msg, int level);
 
 // define interpolation types
 enum { LINEAR, CUBIC, SPLINE, SINC };
@@ -40,7 +51,6 @@ class breakpoint
 	void set_max_duration(unsigned int new_max);
 	unsigned int get_duration();
 	float get_amplitude();
-	//TODO: do we need these accessor fuctions?
 	unsigned int get_center_duration();
 	float get_center_amplitude();
 }; //end breakpoint class def
@@ -56,7 +66,7 @@ class gendy_waveform
 	// the wavelength(in samples) of the current cycle of waveform
 	unsigned int current_wavelength;
 	// list of breakpoints
-	list<breakpoint> breakpoint_list;
+	std::list<breakpoint> breakpoint_list;
 	// we store the first breakpoint of the next cycle for continuity
 	breakpoint next_first;
 	// set the type of interpolation(see defines at top)
@@ -73,12 +83,13 @@ class gendy_waveform
 	float duration_pull, amplitude_pull;
 	bool debug;
 
+#ifdef FLEXT_VERSION
 	// buffer to copy to for waveform display
-	float *display_buf;
-	int display_buf_size;
-	// waveform display is written every display_rate samples
+	flext_single::buffer *display_buf;
+	// waveform display is written every display_rate cycles
 	int display_rate;
 	bool display;
+#endif
 
 	void move_breakpoints();
 	void generate_from_breakpoints();
@@ -101,16 +112,14 @@ class gendy_waveform
 	void set_duration_pull(float new_pull);
 	void set_constrain_endpoints(bool constrain);
 	unsigned int get_wave_data(float *buffer, unsigned int n);
-	//
+#ifdef FLEXT_VERSION
 	// display_toggle with no args flips state
 	void display_toggle();
 	void display_toggle(bool state);
 	void set_display_rate(int rate);
-	void set_display_buffer(float *buf, int size);
+	void set_display_buffer(flext_single::buffer *buf);
 	void display_waveform();
-
-
-
+#endif
 }; //end gendy_waveform class def
 
 // misc utility functions

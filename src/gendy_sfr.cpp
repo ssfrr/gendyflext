@@ -9,6 +9,17 @@
 
 using namespace std;
 
+// shows msg if allowed by LOG_LEVEL
+#ifdef PD_MAJOR_VERSION
+extern void print_log(const char *msg, int level){
+  if (LOG_LEVEL >= level) {
+    post("gendy: %s\n", msg);
+  }
+}
+#else
+void print_log(char *msg, int level) {}
+#endif
+
 // wave buffer will be initialized large enough to hold 10
 // seconds of data at 44.1kHz
 const int WAVE_BUFFER_INIT_SIZE = 441000;
@@ -153,10 +164,11 @@ gendy_waveform::gendy_waveform() {
 	set_avg_wavelength(147);
 	set_interpolation(LINEAR);
 	set_waveshape(FLAT);
+#ifdef FLEXT_VERSION
 	display_buf = NULL;
-	display_buf_size = 0;
 	display_rate = 5;
 	display = false;
+#endif
 
 	// start with a single breakpoint that spans the whole wavelength
 	breakpoint_list.push_front(breakpoint(147,0,147,0));
@@ -229,6 +241,7 @@ void gendy_waveform::set_constrain_endpoints(bool constrain) {
 	constrain_endpoints = constrain;
 }
 
+#ifdef FLEXT_VERSION
 void gendy_waveform::display_toggle() {
 	display = !display;
 }
@@ -242,21 +255,30 @@ void gendy_waveform::set_display_rate(int rate) {
 		display_rate = rate;
 }
 
-void gendy_waveform::set_display_buffer(float *buf, int size) {
+void gendy_waveform::set_display_buffer(flext_single::buffer *buf) {
 	display_buf = buf;
-	display_buf_size = size;
 }
 
+// conditionally copies waveform to Flext buffer and marks it dirty
 void gendy_waveform::display_waveform() {
 	static int display_count = 0;
 	int n = 0;
+
+	if(!display_buf || !display_buf->Ok()) {
+		print_log("gendy-sfr: Invalid Buffer", LOG_ERROR);
+		return;
+	}
+
+	t_word *buf = display_buf->Data();
+	int bufsize = display_buf->Frames();
 	if(++display_count >= display_rate) {
-		while(n < current_wavelength && n < display_buf_size)
-			display_buf[n] = wave_samples[n++];
+		while(n < current_wavelength && n < bufsize)
+			buf[n].w_float = wave_samples[n++];
 		display_count = 0;
-		//TODO set dirty flag on output buffer
+		display_buf->Dirty(true);
 	}
 }
+#endif
 // set new positions for all the breakpoints and update current_wavelength
 // NB: could be easily modified and cleaned up a little if next_first was 
 // stored in the last spot in the breakpoint list, instead of as a separate
@@ -321,8 +343,10 @@ void gendy_waveform::generate_from_breakpoints() {
 		}
 	}
 	// TODO: implement other interpolations
+#ifdef FLEXT_VERSION
 	if(display)
 		display_waveform();
+#endif
 }
 
 // find the biggest space between breakpoints and add a new one

@@ -46,6 +46,9 @@ class gendy:  public flext_dsp {
 		void set_interpolation_cubic();
 		void set_interpolation_spline();
 		void set_interpolation_sinc();
+		void set_waveform_flat();
+		void set_waveform_sine();
+		void set_waveform_square();
 		void set_debug(int new_debug);
 		void set_outbuf(short argc, t_atom *argv);
 
@@ -66,6 +69,7 @@ class gendy:  public flext_dsp {
 		// Internal class methods
 		static void class_setup(t_classid thisclass);
 		void set_interpolation(int interpolation);
+		void set_waveform(int waveform);
 
 		// register the callbacks, and tell flext their calling format
 		FLEXT_CALLBACK_F(set_frequency)
@@ -78,6 +82,9 @@ class gendy:  public flext_dsp {
 		FLEXT_CALLBACK(set_interpolation_cubic)
 		FLEXT_CALLBACK(set_interpolation_spline)
 		FLEXT_CALLBACK(set_interpolation_sinc)
+		FLEXT_CALLBACK(set_waveform_flat)
+		FLEXT_CALLBACK(set_waveform_sine)
+		FLEXT_CALLBACK(set_waveform_square)
 		FLEXT_CALLBACK_I(set_debug)
 		FLEXT_CALLBACK_V(set_outbuf)
 };
@@ -126,6 +133,9 @@ void gendy::class_setup(t_classid thisclass) {
 	FLEXT_CADDMETHOD_(thisclass, 0, "cubic", set_interpolation_cubic);
 	FLEXT_CADDMETHOD_(thisclass, 0, "spline", set_interpolation_spline);
 	FLEXT_CADDMETHOD_(thisclass, 0, "sinc", set_interpolation_sinc);
+	FLEXT_CADDMETHOD_(thisclass, 0, "flat", set_waveform_flat);
+	FLEXT_CADDMETHOD_(thisclass, 0, "sine", set_waveform_sine);
+	FLEXT_CADDMETHOD_(thisclass, 0, "square", set_waveform_square);
 	FLEXT_CADDMETHOD_(thisclass, 0, "debug", set_debug);
 	FLEXT_CADDMETHOD_(thisclass, 0, "display", set_outbuf);
 	print_log("--- gendy~ by Spencer Russell ---", LOG_INFO);
@@ -194,6 +204,21 @@ void gendy::set_interpolation_sinc() {
 	set_interpolation(SINC);
 }
 
+void gendy::set_waveform_flat() {
+	print_log("set_waveform_flat()", LOG_DEBUG);
+	set_waveform(FLAT);
+}
+
+void gendy::set_waveform_sine() {
+	print_log("set_waveform_sine()", LOG_DEBUG);
+	set_waveform(SINE);
+}
+
+void gendy::set_waveform_square() {
+	print_log("set_waveform_square()", LOG_DEBUG);
+	set_waveform(SQUARE);
+}
+
 void gendy::set_debug(int new_debug) {
 	print_log("set_debug(%d)", new_debug, LOG_DEBUG);
 	if(new_debug)
@@ -239,6 +264,10 @@ void gendy::set_outbuf(short argc, t_atom *argv) {
 // private class methods
 void gendy::set_interpolation(int new_interpolation) {
 	waveform.set_interpolation(new_interpolation);
+}
+
+void gendy::set_waveform(int new_waveform) {
+	waveform.set_waveshape(new_waveform);
 }
 
 //register the gendy class as a PD or Max object

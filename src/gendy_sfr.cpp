@@ -250,6 +250,7 @@ void gendy_waveform::set_interpolation_type(t_symbol *new_interpolation) {
 
 void gendy_waveform::set_waveshape(unsigned int new_waveshape) {
 	waveshape = new_waveshape;
+	center_breakpoints();
 }
 
 void gendy_waveform::set_step_width(float new_width) {

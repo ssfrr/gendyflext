@@ -36,6 +36,7 @@ center_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::center_breakpoints() {$/
 center_dur	gendy_sfr.h	/^	unsigned int center_dur;$/;"	m	class:breakpoint
 class_setup	main.cpp	/^void gendy::class_setup(t_classid thisclass) {$/;"	f	class:gendy
 constrain_endpoints	gendy_sfr.h	/^	bool constrain_endpoints;$/;"	m	class:gendy_waveform
+copy_index	gendy_sfr.h	/^	unsigned int copy_index;$/;"	m	class:gendy_waveform
 current_wavelength	gendy_sfr.h	/^	unsigned int current_wavelength;$/;"	m	class:gendy_waveform
 debug	gendy_sfr.h	/^	bool debug;$/;"	m	class:gendy_waveform
 debug	main.cpp	/^		static bool debug;$/;"	m	class:gendy	file:
@@ -75,6 +76,7 @@ next_first	gendy_sfr.h	/^	breakpoint next_first;$/;"	m	class:gendy_waveform
 print_log	gendy_sfr.cpp	/^extern void print_log(const char *msg, float arg1, int level){$/;"	f
 print_log	gendy_sfr.cpp	/^extern void print_log(const char *msg, int arg1, int level){$/;"	f
 print_log	gendy_sfr.cpp	/^extern void print_log(const char *msg, int level){$/;"	f
+print_log	gendy_sfr.cpp	/^extern void print_log(const char *msg, unsigned int arg1, int level){$/;"	f
 randf	gendy_sfr.cpp	/^double randf() {$/;"	f
 remove_breakpoint	gendy_sfr.cpp	/^void gendy_waveform::remove_breakpoint() {$/;"	f	class:gendy_waveform
 reset_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::reset_breakpoints() {$/;"	f	class:gendy_waveform

@@ -1,44 +1,71 @@
-#N canvas 560 0 815 963 10;
-#X obj 27 762 gendy~;
-#X obj 282 219 hsl 128 15 50 2000 1 0 \$0-freq empty Freq -2 -8 0 10
--262144 -1 -1 0 1;
-#X msg 117 620 h_pull \$1;
-#X msg 296 620 v_pull \$1;
-#X obj 63 87 hsl 128 15 0 1 0 0 \$0-h_pull empty h_pull -2 -8 0 10
--262144 -1 -1 0 1;
-#X obj 64 122 hsl 128 15 0 1 0 0 \$0-v_pull empty v_pull -2 -8 0 10
--262144 -1 -1 0 1;
-#X obj 66 158 hsl 128 15 0 1 0 0 \$0-h_step empty h_step -2 -8 0 10
--262144 -1 -1 0 1;
-#X obj 65 193 hsl 128 15 0 1 0 0 \$0-v_step empty v_step -2 -8 0 10
--262144 -1 -1 0 1;
-#X msg 208 621 h_step \$1;
-#X msg 394 620 v_step \$1;
-#X msg 570 616 breakpoints \$1;
+#N canvas 0 520 1375 443 10;
+#X obj 552 303 gendy~;
+#X obj 282 219 hsl 128 15 50 2000 1 0 \$0-freq \$0-freq_in Freq -2
+-8 0 10 -262144 -1 -1 0 1;
+#X msg 642 161 h_pull \$1;
+#X msg 821 161 v_pull \$1;
+#X obj 63 87 hsl 128 15 0 1 0 0 \$0-h_pull \$0-h_pull_in h_pull -2
+-8 0 10 -262144 -1 -1 0 1;
+#X obj 64 122 hsl 128 15 0 1 0 0 \$0-v_pull \$0-v_pull_in v_pull -2
+-8 0 10 -262144 -1 -1 0 1;
+#X obj 66 158 hsl 128 15 0 1 0 0 \$0-h_step \$0-h_step_in h_step -2
+-8 0 10 -262144 -1 -1 0 1;
+#X obj 65 193 hsl 128 15 0 1 0 0 \$0-v_step \$0-v_step_in v_step -2
+-8 0 10 -262144 -1 -1 0 1;
+#X msg 733 162 h_step \$1;
+#X msg 919 161 v_step \$1;
+#X msg 1096 160 breakpoints \$1;
 #X floatatom 216 227 5 0 0 0 - #0-breakpoints -;
 #N canvas 0 0 450 300 (subpatch) 0;
-#X array \$0-waveform 2000 float 2;
-#X coords 0 1 2000 -1 150 100 1;
+#X array \$0-waveform 1000 float 2;
+#X coords 0 1 1000 -1 150 100 1;
 #X restore 271 74 graph;
-#X obj 61 226 hradio 15 1 0 10 empty \$0-breakpoints Breakpoints 0
--8 0 10 -262144 -1 -1 0;
-#X obj 117 593 r \$0-h_pull;
-#X obj 208 595 r \$0-h_step;
-#X obj 296 592 r \$0-v_pull;
-#X obj 394 593 r \$0-v_step;
-#X obj 489 594 r \$0-freq;
-#X obj 570 592 r \$0-breakpoints;
-#X obj 26 795 outlet~;
-#X obj 24 473 inlet;
-#X obj 242 797 outlet;
-#X msg 489 621 freq \$1;
-#X obj 120 450 loadbang;
-#X msg 120 506 display \$1-waveform;
-#X obj 120 476 f \$0;
-#X obj 309 179 tgl 15 0 \$0-display empty Display 20 7 0 10 -262144
--1 -1 0 1;
-#X obj 701 592 r \$0-display;
-#X msg 701 614 display \$1;
+#X obj 61 226 hradio 15 1 0 10 empty \$0-breakpoints_in Breakpoints
+0 -8 0 10 -262144 -1 -1 2;
+#X obj 642 134 r \$0-h_pull;
+#X obj 733 136 r \$0-h_step;
+#X obj 821 133 r \$0-v_pull;
+#X obj 919 134 r \$0-v_step;
+#X obj 1014 135 r \$0-freq;
+#X obj 1095 133 r \$0-breakpoints;
+#X obj 551 336 outlet~;
+#X obj 810 27 inlet;
+#X obj 767 338 outlet;
+#X msg 1014 162 freq \$1;
+#X obj 479 110 loadbang;
+#X msg 479 166 display \$1-waveform;
+#X obj 479 136 f \$0;
+#X obj 309 179 tgl 15 0 \$0-display \$0-display_in Display 20 7 0 10
+-262144 -1 -1 0 1;
+#X obj 1226 133 r \$0-display;
+#X msg 1226 155 display \$1;
+#N canvas 0 0 1375 272 input 0;
+#X obj 154 138 s \$0-h_pull_in;
+#X obj 275 138 s \$0-h_step_in;
+#X obj 403 133 s \$0-v_pull_in;
+#X obj 519 127 s \$0-v_step_in;
+#X obj 683 128 s \$0-freq_in;
+#X obj 824 127 s \$0-breakpoints_in;
+#X obj 984 128 s \$0-display_in;
+#X obj 515 17 inlet;
+#X obj 515 42 route h_pull h_step v_pull v_step freq breakpoints display
+;
+#X obj 818 86 - 1;
+#X connect 7 0 8 0;
+#X connect 8 0 0 0;
+#X connect 8 1 1 0;
+#X connect 8 2 2 0;
+#X connect 8 3 3 0;
+#X connect 8 4 4 0;
+#X connect 8 5 9 0;
+#X connect 8 6 6 0;
+#X connect 9 0 5 0;
+#X restore 810 49 pd input;
+#X obj 61 293 s \$0-breakpoints;
+#X obj 61 259 + 1;
+#X obj 903 20 loadbang;
+#X msg 903 42 1;
+#X obj 903 64 s \$0-display_in;
 #X connect 0 0 20 0;
 #X connect 2 0 0 0;
 #X connect 2 0 22 0;
@@ -50,13 +77,14 @@
 #X connect 9 0 22 0;
 #X connect 10 0 0 0;
 #X connect 10 0 22 0;
+#X connect 13 0 32 0;
 #X connect 14 0 2 0;
 #X connect 15 0 8 0;
 #X connect 16 0 3 0;
 #X connect 17 0 9 0;
 #X connect 18 0 23 0;
 #X connect 19 0 10 0;
-#X connect 21 0 0 0;
+#X connect 21 0 30 0;
 #X connect 23 0 22 0;
 #X connect 23 0 0 0;
 #X connect 24 0 26 0;
@@ -65,4 +93,7 @@
 #X connect 28 0 29 0;
 #X connect 29 0 22 0;
 #X connect 29 0 0 0;
+#X connect 32 0 31 0;
+#X connect 33 0 34 0;
+#X connect 34 0 35 0;
 #X coords 0 -1 1 1 400 200 1 50 50;

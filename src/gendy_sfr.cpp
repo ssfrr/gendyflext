@@ -44,7 +44,7 @@ extern void print_log(const char *msg, float arg1, int level){}
 const int WAVE_BUFFER_INIT_SIZE = 441000;
 
 breakpoint::breakpoint() {
-	print_log("gendy: New breakpoint with default args", LOG_DEBUG);
+	print_log("gendy~: New breakpoint with default args", LOG_DEBUG);
 	duration = 0;
 	amplitude = 0;
 	center_dur = 0;
@@ -53,18 +53,18 @@ breakpoint::breakpoint() {
 }
 
 breakpoint::breakpoint(unsigned int duration, float amplitude) {
-	print_log("gendy: New breakpoint with duration %u", duration, LOG_DEBUG);
-	print_log("gendy: \t\t\tamplitude %f", amplitude, LOG_DEBUG);
+	print_log("gendy~: New breakpoint with duration %u", duration, LOG_DEBUG);
+	print_log("gendy~: \t\t\tamplitude %f", amplitude, LOG_DEBUG);
 	this->duration = duration;
 	this->amplitude = amplitude;
 }
 
 breakpoint::breakpoint(unsigned int duration, float amplitude,
 		unsigned int center_dur, float center_amp) {
-	print_log("gendy: New breakpoint with duration %u", duration, LOG_DEBUG);
-	print_log("gendy: \t\t\tamplitude %f", amplitude, LOG_DEBUG);
-	print_log("gendy: \t\t\tcenter_dur %u", center_dur, LOG_DEBUG);
-	print_log("gendy: \t\t\tcenter_amp %f", center_amp, LOG_DEBUG);
+	print_log("gendy~: New breakpoint with duration %u", duration, LOG_DEBUG);
+	print_log("gendy~: \t\t\tamplitude %f", amplitude, LOG_DEBUG);
+	print_log("gendy~: \t\t\tcenter_dur %u", center_dur, LOG_DEBUG);
+	print_log("gendy~: \t\t\tcenter_amp %f", center_amp, LOG_DEBUG);
 	this->duration = duration;
 	this->amplitude = amplitude;
 	this->center_dur = center_dur;
@@ -190,6 +190,7 @@ gendy_waveform::gendy_waveform() {
 	set_avg_wavelength(147);
 	set_interpolation(LINEAR);
 	set_waveshape(FLAT);
+	copy_index = 0;
 #ifdef FLEXT_VERSION
 	display_buf = NULL;
 	display_rate = 5;
@@ -211,6 +212,10 @@ gendy_waveform::~gendy_waveform() {
 }
 
 void gendy_waveform::set_num_breakpoints(unsigned int new_size) {
+	if(new_size == 0) {
+		print_log("gendy~: Cannot resize to 0, resizing to 1", LOG_ERROR);
+		new_size = 1;
+	}
 	while(breakpoint_list.size() < (new_size))
 		add_breakpoint();
 	while(breakpoint_list.size() > (new_size))
@@ -494,7 +499,6 @@ void gendy_waveform::reset_breakpoints() {
 unsigned int gendy_waveform::get_wave_data(float *buffer, unsigned int n) {
 	unsigned int samples_copied = 0;
 	// keep track of where in the waveform we're copying from
-	static unsigned int copy_index = 0;
 	while(samples_copied < n) {
 		// if the waveform has been completely copied out, generate a new one
 		if(copy_index == current_wavelength) {

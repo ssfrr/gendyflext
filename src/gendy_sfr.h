@@ -63,6 +63,8 @@ class gendy_waveform
 	// buffer containing the current cycle of the waveform
 	float *wave_samples;
 	unsigned int wave_buffer_size;
+	// keep track of how much of the waveform we've copied out
+	unsigned int copy_index;
 	// average wavelength in samples. the wave grows and shrinks cycle to
 	// cycle depending on the motion of the breakpoints
 	unsigned int average_wavelength;

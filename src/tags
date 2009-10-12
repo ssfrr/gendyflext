@@ -25,19 +25,19 @@ WAVE_BUFFER_INIT_SIZE	gendy_sfr.cpp	/^const int WAVE_BUFFER_INIT_SIZE = 441000;$
 add_breakpoint	gendy_sfr.cpp	/^void gendy_waveform::add_breakpoint() {$/;"	f	class:gendy_waveform
 amplitude	gendy_sfr.h	/^	float amplitude;$/;"	m	class:breakpoint
 amplitude_pull	gendy_sfr.h	/^	float duration_pull, amplitude_pull;$/;"	m	class:gendy_waveform
-average_wavelength	gendy_sfr.h	/^	unsigned int average_wavelength;$/;"	m	class:gendy_waveform
+average_wavelength	gendy_sfr.h	/^	float average_wavelength;$/;"	m	class:gendy_waveform
 breakpoint	gendy_sfr.cpp	/^breakpoint::breakpoint() {$/;"	f	class:breakpoint
 breakpoint	gendy_sfr.cpp	/^breakpoint::breakpoint(unsigned int duration, float amplitude) {$/;"	f	class:breakpoint
 breakpoint	gendy_sfr.cpp	/^breakpoint::breakpoint(unsigned int duration, float amplitude,$/;"	f	class:breakpoint
 breakpoint	gendy_sfr.h	/^class breakpoint$/;"	c
 breakpoint_list	gendy_sfr.h	/^	std::list<breakpoint> breakpoint_list;$/;"	m	class:gendy_waveform
-center_amp	gendy_sfr.h	/^	float center_amp;$/;"	m	class:breakpoint
+center_amp	gendy_sfr.h	/^	float center_amp, center_dur, max_duration;$/;"	m	class:breakpoint
 center_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::center_breakpoints() {$/;"	f	class:gendy_waveform
-center_dur	gendy_sfr.h	/^	unsigned int center_dur;$/;"	m	class:breakpoint
+center_dur	gendy_sfr.h	/^	float center_amp, center_dur, max_duration;$/;"	m	class:breakpoint
 class_setup	main.cpp	/^void gendy::class_setup(t_classid thisclass) {$/;"	f	class:gendy
 constrain_endpoints	gendy_sfr.h	/^	bool constrain_endpoints;$/;"	m	class:gendy_waveform
 copy_index	gendy_sfr.h	/^	unsigned int copy_index;$/;"	m	class:gendy_waveform
-current_wavelength	gendy_sfr.h	/^	unsigned int current_wavelength;$/;"	m	class:gendy_waveform
+current_wavelength	gendy_sfr.h	/^	float current_wavelength;$/;"	m	class:gendy_waveform
 debug	gendy_sfr.h	/^	bool debug;$/;"	m	class:gendy_waveform
 debug	main.cpp	/^		static bool debug;$/;"	m	class:gendy	file:
 debug	main.cpp	/^bool gendy::debug = true;$/;"	m	class:gendy	file:
@@ -51,7 +51,7 @@ display_rate	main.cpp	/^		int display_rate;$/;"	m	class:gendy	file:
 display_toggle	gendy_sfr.cpp	/^void gendy_waveform::display_toggle() {$/;"	f	class:gendy_waveform
 display_toggle	gendy_sfr.cpp	/^void gendy_waveform::display_toggle(bool state) {$/;"	f	class:gendy_waveform
 display_waveform	gendy_sfr.cpp	/^void gendy_waveform::display_waveform() {$/;"	f	class:gendy_waveform
-duration	gendy_sfr.h	/^	unsigned int duration;$/;"	m	class:breakpoint
+duration	gendy_sfr.h	/^	float duration;$/;"	m	class:breakpoint
 duration_pull	gendy_sfr.h	/^	float duration_pull, amplitude_pull;$/;"	m	class:gendy_waveform
 elastic_move	gendy_sfr.cpp	/^void breakpoint::elastic_move(float h_step, float v_step, $/;"	f	class:breakpoint
 gauss	gendy_sfr.cpp	/^double gauss() {$/;"	f
@@ -70,9 +70,10 @@ get_wave_data	gendy_sfr.cpp	/^unsigned int gendy_waveform::get_wave_data(float *
 id	main.cpp	/^		unsigned int id;$/;"	m	class:gendy	file:
 interpolation_type	gendy_sfr.h	/^	unsigned int interpolation_type;$/;"	m	class:gendy_waveform
 m_signal	main.cpp	/^void gendy::m_signal(int n, float *const *in, float *const *out) {$/;"	f	class:gendy
-max_duration	gendy_sfr.h	/^	unsigned int max_duration;$/;"	m	class:breakpoint
+max_duration	gendy_sfr.h	/^	float center_amp, center_dur, max_duration;$/;"	m	class:breakpoint
 move_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::move_breakpoints() {$/;"	f	class:gendy_waveform
 next_first	gendy_sfr.h	/^	breakpoint next_first;$/;"	m	class:gendy_waveform
+phase	gendy_sfr.h	/^	float phase;$/;"	m	class:gendy_waveform
 print_log	gendy_sfr.cpp	/^extern void print_log(const char *msg, float arg1, int level){$/;"	f
 print_log	gendy_sfr.cpp	/^extern void print_log(const char *msg, int arg1, int level){$/;"	f
 print_log	gendy_sfr.cpp	/^extern void print_log(const char *msg, int level){$/;"	f
@@ -111,6 +112,10 @@ set_step_height	gendy_sfr.cpp	/^void gendy_waveform::set_step_height(float new_h
 set_step_width	gendy_sfr.cpp	/^void gendy_waveform::set_step_width(float new_width) {$/;"	f	class:gendy_waveform
 set_v_pull	main.cpp	/^void gendy::set_v_pull(float new_pull) {$/;"	f	class:gendy
 set_v_step	main.cpp	/^void gendy::set_v_step(float new_stepsize) {$/;"	f	class:gendy
+set_waveform	main.cpp	/^void gendy::set_waveform(int new_waveform) {$/;"	f	class:gendy
+set_waveform_flat	main.cpp	/^void gendy::set_waveform_flat() {$/;"	f	class:gendy
+set_waveform_sine	main.cpp	/^void gendy::set_waveform_sine() {$/;"	f	class:gendy
+set_waveform_square	main.cpp	/^void gendy::set_waveform_square() {$/;"	f	class:gendy
 set_waveshape	gendy_sfr.cpp	/^void gendy_waveform::set_waveshape(unsigned int new_waveshape) {$/;"	f	class:gendy_waveform
 step_height	gendy_sfr.h	/^	float step_width, step_height;$/;"	m	class:gendy_waveform
 step_width	gendy_sfr.h	/^	float step_width, step_height;$/;"	m	class:gendy_waveform

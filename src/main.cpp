@@ -149,7 +149,7 @@ void gendy::class_setup(t_classid thisclass) {
 //  These are arrays of signal vectors(in is a pointer to const pointer to float)
 
 void gendy::m_signal(int n, float *const *in, float *const *out) {
-	waveform.get_wave_data(out[0], n);
+	waveform.fill_buffer(out[0], n);
 }
 
 // Message handling functions

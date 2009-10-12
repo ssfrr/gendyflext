@@ -52,15 +52,15 @@ breakpoint::breakpoint() {
 	max_duration = 0;
 }
 
-breakpoint::breakpoint(unsigned int duration, float amplitude) {
+breakpoint::breakpoint(float duration, float amplitude) {
 	print_log("gendy~: New breakpoint with duration %u", duration, LOG_DEBUG);
 	print_log("gendy~: \t\t\tamplitude %f", amplitude, LOG_DEBUG);
 	this->duration = duration;
 	this->amplitude = amplitude;
 }
 
-breakpoint::breakpoint(unsigned int duration, float amplitude,
-		unsigned int center_dur, float center_amp) {
+breakpoint::breakpoint(float duration, float amplitude,
+		float center_dur, float center_amp) {
 	print_log("gendy~: New breakpoint with duration %u", duration, LOG_DEBUG);
 	print_log("gendy~: \t\t\tamplitude %f", amplitude, LOG_DEBUG);
 	print_log("gendy~: \t\t\tcenter_dur %u", center_dur, LOG_DEBUG);
@@ -123,7 +123,7 @@ void breakpoint::elastic_move(float h_step, float v_step,
 	amplitude = new_amplitude;
 }
 
-void breakpoint::set_duration(unsigned int new_duration) {
+void breakpoint::set_duration(float new_duration) {
 	duration = new_duration;
 }
 
@@ -131,13 +131,13 @@ void breakpoint::set_amplitude(float new_amplitude) {
 	amplitude = new_amplitude;
 }
 
-void breakpoint::set_position(unsigned int new_duration, float new_amplitude) {
+void breakpoint::set_position(float new_duration, float new_amplitude) {
 	//TODO: argument sanitization
 	duration = new_duration;
 	amplitude = new_amplitude;
 }
 
-void breakpoint::set_center_duration(unsigned int new_duration) {
+void breakpoint::set_center_duration(float new_duration) {
 	center_dur = new_duration;
 }
 
@@ -149,18 +149,18 @@ void breakpoint::set_center_amplitude(float new_amplitude) {
 // accessor function to set the amplitude and duration of a breakpoint's
 // center position
 
-void breakpoint::set_center(unsigned int new_duration, float new_amplitude) {
+void breakpoint::set_center(float new_duration, float new_amplitude) {
 	//TODO: argument sanitization
 	center_dur= new_duration;
 	center_amp = new_amplitude;
 	max_duration = new_duration * 10;
 }
 
-void breakpoint::set_max_duration(unsigned int new_max) {
+void breakpoint::set_max_duration(float new_max) {
 	max_duration = new_max;
 }
 
-unsigned int breakpoint::get_duration() {
+float breakpoint::get_duration() {
 	return duration;
 }
 
@@ -168,7 +168,7 @@ float breakpoint::get_amplitude() {
 	return amplitude;
 }
 
-unsigned int breakpoint::get_center_duration() {
+float breakpoint::get_center_duration() {
 	return center_dur;
 }
 
@@ -223,7 +223,7 @@ void gendy_waveform::set_num_breakpoints(unsigned int new_size) {
 	center_breakpoints();
 }
 
-void gendy_waveform::set_avg_wavelength(unsigned int new_wavelength) {
+void gendy_waveform::set_avg_wavelength(float new_wavelength) {
 	// wave buffer needs to be at least 10 times the length of the average
 	// waveform. When frequency changes, re-allocate if the current buffer
 	// is too small
@@ -325,7 +325,7 @@ void gendy_waveform::display_waveform() {
 // object
 void gendy_waveform::move_breakpoints() {
 	list<breakpoint>::iterator i;
-	unsigned int total_dur = 0;
+	float total_dur = 0;
 	// first we copy in the previously calculated first breakpoint 
 	breakpoint_list.begin()->set_duration(next_first.get_duration());
 	breakpoint_list.begin()->set_amplitude(next_first.get_amplitude());
@@ -496,7 +496,7 @@ void gendy_waveform::reset_breakpoints() {
 
 // copies the waveform into a buffer of size n until the buffer is full.  When
 // the waveform is fully copied another cycle is generated.
-unsigned int gendy_waveform::get_wave_data(float *buffer, unsigned int n) {
+unsigned int gendy_waveform::fill_buffer(float *buffer, unsigned int n) {
 	unsigned int samples_copied = 0;
 	// keep track of where in the waveform we're copying from
 	while(samples_copied < n) {

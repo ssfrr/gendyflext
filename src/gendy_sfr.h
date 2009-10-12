@@ -30,31 +30,30 @@ enum { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };
 class breakpoint
 {
 	// store current breakpoint location
+	// duration is in samples
 	float amplitude;
-	unsigned int duration;
+	float duration;
 
 	// store the center point the breakpoint gravitates to
-	float center_amp;
-	unsigned int center_dur;
-	unsigned int max_duration;
+	float center_amp, center_dur, max_duration;
 
 	public:
 	breakpoint();
-	breakpoint(unsigned int duration, float amplitude);
-	breakpoint(unsigned int duration, float amplitude,
-			unsigned int center_dur, float center_amp);
+	breakpoint(float duration, float amplitude);
+	breakpoint(float duration, float amplitude,
+			float center_dur, float center_amp);
 	void elastic_move(float h_step, float v_step, 
 			float h_pull, float v_pull);
-	void set_duration(unsigned int new_duration);
+	void set_duration(float new_duration);
 	void set_amplitude(float new_amplitude);
-	void set_position(unsigned int new_duration, float new_amplitude);
-	void set_center_duration(unsigned int new_duration);
+	void set_position(float new_duration, float new_amplitude);
+	void set_center_duration(float new_duration);
 	void set_center_amplitude(float new_amplitude);
-	void set_center(unsigned int new_duration, float new_amplitude);
-	void set_max_duration(unsigned int new_max);
-	unsigned int get_duration();
+	void set_center(float new_duration, float new_amplitude);
+	void set_max_duration(float new_max);
+	float get_duration();
 	float get_amplitude();
-	unsigned int get_center_duration();
+	float get_center_duration();
 	float get_center_amplitude();
 }; //end breakpoint class def
 
@@ -65,11 +64,14 @@ class gendy_waveform
 	unsigned int wave_buffer_size;
 	// keep track of how much of the waveform we've copied out
 	unsigned int copy_index;
-	// average wavelength in samples. the wave grows and shrinks cycle to
-	// cycle depending on the motion of the breakpoints
-	unsigned int average_wavelength;
-	// the wavelength(in samples) of the current cycle of waveform
-	unsigned int current_wavelength;
+	// keep track of where we are in the waveform (in samples)
+	float phase;
+	// average wavelength in samples. 	
+	float average_wavelength;
+	// the wavelength(in samples) of the current cycle of waveform. The wave
+	// grows and shrinks cycle to cycle depending on the motion of the
+	// breakpoints
+	float current_wavelength;
 	// list of breakpoints
 	std::list<breakpoint> breakpoint_list;
 	// we store the first breakpoint of the next cycle for continuity
@@ -80,12 +82,13 @@ class gendy_waveform
 	unsigned int waveshape;
 	// constrain endpoints to 0
 	bool constrain_endpoints;
-	// std. dev. of the normal distribution that determines the
-	// motion of the breakpoints. width is in samples.
+	// determines the motion of the breakpoints. expected to be 0-1, where
+	// 0 is no motion and 1 is basically fully random jumps
 	float step_width, step_height;
 	// the extent to which the duration and amplitude are pulled to match
 	// the waveshape. ranges from 0 to 1
 	float duration_pull, amplitude_pull;
+	// eventually debugging info will be switchable on an object-basis
 	bool debug;
 
 #ifdef FLEXT_VERSION
@@ -116,7 +119,7 @@ class gendy_waveform
 	void set_amplitude_pull(float new_pull);
 	void set_duration_pull(float new_pull);
 	void set_constrain_endpoints(bool constrain);
-	unsigned int get_wave_data(float *buffer, unsigned int n);
+	unsigned int fill_buffer(float *buffer, unsigned int n);
 #ifdef FLEXT_VERSION
 	// display_toggle with no args flips state
 	void display_toggle();

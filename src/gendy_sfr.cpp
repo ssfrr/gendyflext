@@ -5,6 +5,10 @@
 //
 
 #include "gendy_sfr.h"
+#include <limits>
+#include <ctime>
+#include <cstdlib>
+#include <cmath>
 
 using namespace std;
 
@@ -431,7 +435,7 @@ void gendy_waveform::add_breakpoint() {
 // should be reset after.
 void gendy_waveform::remove_breakpoint() {
 	// start smallest_space to be the largest integer as defined in limits.h
-	gendydur_t smallest_space = UINT_MAX;
+	gendydur_t smallest_space = numeric_limits<gendydur_t>::max();
 	gendydur_t space;
 	list<breakpoint>::iterator smallest_space_position;
 	list<breakpoint>::iterator i = breakpoint_list.begin();

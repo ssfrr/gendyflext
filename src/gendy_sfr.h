@@ -1,8 +1,4 @@
 #include <list>
-#include <climits>
-#include <ctime>
-#include <cstdlib>
-#include <cmath>
 
 #include <flext.h>
 

@@ -307,13 +307,12 @@ void gendy_waveform::display_waveform() {
 		display_buf->Update();
 		// resize table to fit 1 wavelength
 		//display_buf->Frames(current_wavelength, false, false);
-		t_word *buf = display_buf->Data();
 		int bufsize = display_buf->Frames();
 		while(n < current_wavelength && n < bufsize)
-			buf[n].w_float = wave_samples[n++];
+			display_buf->Poke(n, wave_samples[n++]);
 		// zero out the rest of the buffer
 		while(n < bufsize)
-			buf[n++].w_float = 0;
+			display_buf->Poke(n++, 0);
 		display_count = 0;
 		display_buf->Dirty(true);
 		display_buf->Unlock(state);

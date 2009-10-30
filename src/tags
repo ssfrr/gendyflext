@@ -31,9 +31,9 @@ breakpoint	gendy_sfr.cpp	/^breakpoint::breakpoint(gendydur_t duration, gendyamp_
 breakpoint	gendy_sfr.cpp	/^breakpoint::breakpoint(gendydur_t duration, gendyamp_t amplitude,$/;"	f	class:breakpoint
 breakpoint	gendy_sfr.h	/^class breakpoint$/;"	c
 breakpoint_list	gendy_sfr.h	/^	std::list<breakpoint> breakpoint_list;$/;"	m	class:gendy_waveform
-center_amp	gendy_sfr.h	/^	float center_amp, center_dur, max_duration;$/;"	m	class:breakpoint
+center_amp	gendy_sfr.h	/^	gendyamp_t center_amp;$/;"	m	class:breakpoint
 center_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::center_breakpoints() {$/;"	f	class:gendy_waveform
-center_dur	gendy_sfr.h	/^	float center_amp, center_dur, max_duration;$/;"	m	class:breakpoint
+center_dur	gendy_sfr.h	/^	gendydur_t center_dur, max_duration;$/;"	m	class:breakpoint
 class_setup	main.cpp	/^void gendy::class_setup(t_classid thisclass) {$/;"	f	class:gendy
 constrain_endpoints	gendy_sfr.h	/^	bool constrain_endpoints;$/;"	m	class:gendy_waveform
 copy_index	gendy_sfr.h	/^	unsigned int copy_index;$/;"	m	class:gendy_waveform
@@ -74,7 +74,7 @@ id	main.cpp	/^		unsigned int id;$/;"	m	class:gendy	file:
 interpolation_t	gendy_sfr.h	/^enum interpolation_t{ LINEAR, CUBIC, SPLINE, SINC };$/;"	g
 interpolation_type	gendy_sfr.h	/^	interpolation_t interpolation_type;$/;"	m	class:gendy_waveform
 m_signal	main.cpp	/^void gendy::m_signal(int n, float *const *in, float *const *out) {$/;"	f	class:gendy
-max_duration	gendy_sfr.h	/^	float center_amp, center_dur, max_duration;$/;"	m	class:breakpoint
+max_duration	gendy_sfr.h	/^	gendydur_t center_dur, max_duration;$/;"	m	class:breakpoint
 move_breakpoints	gendy_sfr.cpp	/^void gendy_waveform::move_breakpoints() {$/;"	f	class:gendy_waveform
 next_first	gendy_sfr.h	/^	breakpoint next_first;$/;"	m	class:gendy_waveform
 phase	gendy_sfr.h	/^	gendydur_t phase;$/;"	m	class:gendy_waveform

@@ -68,8 +68,8 @@ class gendy:  public flext_dsp {
 		
 		// Internal class methods
 		static void class_setup(t_classid thisclass);
-		void set_interpolation(int interpolation);
-		void set_waveform(int waveform);
+		void set_interpolation(interpolation_t interpolation);
+		void set_waveform(waveshape_t waveform);
 
 		// register the callbacks, and tell flext their calling format
 		FLEXT_CALLBACK_F(set_frequency)
@@ -262,11 +262,11 @@ void gendy::set_outbuf(short argc, t_atom *argv) {
 }
 
 // private class methods
-void gendy::set_interpolation(int new_interpolation) {
+void gendy::set_interpolation(interpolation_t new_interpolation) {
 	waveform.set_interpolation(new_interpolation);
 }
 
-void gendy::set_waveform(int new_waveform) {
+void gendy::set_waveform(waveshape_t new_waveform) {
 	waveform.set_waveshape(new_waveform);
 }
 

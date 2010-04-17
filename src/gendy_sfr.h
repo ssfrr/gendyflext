@@ -70,10 +70,10 @@ class gendy_waveform
 	gendydur_t phase;
 	// average wavelength in samples. 	
 	float average_wavelength;
-	// the wavelength(in samples) of the current cycle of waveform. The wave
-	// grows and shrinks cycle to cycle depending on the motion of the
-	// breakpoints
-	gendydur_t current_wavelength;
+	// the wavelength(in samples) of the current cycle of waveform stored in
+	// the internal buffer. The wave grows and shrinks cycle to cycle depending
+	// on the motion of the breakpoints
+	unsigned int current_wavelength;
 	// list of breakpoints
 	std::list<breakpoint> breakpoint_list;
 	// we store the first breakpoint of the next cycle for continuity

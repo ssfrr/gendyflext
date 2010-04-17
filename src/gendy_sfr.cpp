@@ -97,9 +97,9 @@ void breakpoint::elastic_move(gendydur_t h_step, gendyamp_t v_step,
 	gendydur_t new_duration;
 	gendyamp_t new_amplitude;
 
-	new_duration = old_duration + round(h_step * 
+	new_duration = old_duration + h_step * 
 			(h_pull * (center_dur - old_duration) + 
-			(1.0 - h_pull) * gauss() * center_dur));
+			(1.0 - h_pull) * gauss() * center_dur);
 	/*new_duration = old_duration + round((1.0 - h_pull) * h_step * gauss() +
 		(h_pull * (center_dur - old_duration))); */
 	// set mirror boundaries on new_duration
@@ -195,6 +195,7 @@ gendy_waveform::gendy_waveform() {
 	set_interpolation(LINEAR);
 	set_waveshape(FLAT);
 	copy_index = 0;
+	phase = 0;
 #ifdef FLEXT_VERSION
 	display_buf = NULL;
 	display_rate = 5;
@@ -313,10 +314,10 @@ void gendy_waveform::display_waveform() {
 		//display_buf->Frames(current_wavelength, false, false);
 		int bufsize = display_buf->Frames();
 		while(n < current_wavelength && n < bufsize)
-			display_buf->Poke(n, wave_samples[n++]);
+			(*display_buf)[n] = wave_samples[n++];
 		// zero out the rest of the buffer
 		while(n < bufsize)
-			display_buf->Poke(n++, 0);
+			(*display_buf)[n++]= 0;
 		display_count = 0;
 		display_buf->Dirty(true);
 		display_buf->Unlock(state);
@@ -339,8 +340,6 @@ void gendy_waveform::move_breakpoints() {
 		i->elastic_move(step_width, step_height, duration_pull, amplitude_pull);
 		total_dur += i->get_duration();
 	}
-	current_wavelength = total_dur;
-
 	// calculate new position for the first breakpoint in the next cycle
 	next_first.elastic_move(step_width, step_height, duration_pull, amplitude_pull);
 }
@@ -357,34 +356,46 @@ void gendy_waveform::generate_from_breakpoints() {
 		// we'll be going through the waveform piecewise. next will store
 		// the endpoint of the current section
 		list<breakpoint>::iterator next = breakpoint_list.begin();
-		// offset stores how many samples deep into the output buffer the
-		// current segment starts
-		unsigned int offset = 0;
+		// keep track of how long before a sample boundry the current
+		// segment started
+		gendydur_t segment_shift = phase;
 		gendydur_t current_dur, next_dur;
 		gendyamp_t current_amp, next_amp;
 		double slope;
 		current_dur = next->get_duration();
 		current_amp = next->get_amplitude();
+
+		unsigned int i;
+		unsigned int buffer_offset = 0;
 		// for each breakpoint 
 		while(++next != breakpoint_list.end()) {
 			next_amp = next->get_amplitude();
 			slope = (next_amp - current_amp) / current_dur;
-			for(unsigned int i = 0; i < current_dur; i++) {
+			i = 0;
+			while(i + segment_shift < current_dur) {
 				// slower but no discontuinities
 				// wave_samples[i+offset] = current_amp + i / current_dur * 
 				//		(next_amp - current_amp);
-				wave_samples[i+offset] = current_amp + slope * i;
+				wave_samples[i + buffer_offset] = current_amp + 
+					slope * (i + segment_shift);
+				i++;
 			}
-			offset += current_dur;
+			buffer_offset += i;
+			segment_shift = (gendydur_t)i + segment_shift - current_dur;
 			current_dur = next->get_duration();
 			current_amp = next_amp;
 		}
 		// connect up with the first breakpoint of the next cycle
 		next_amp = next_first.get_amplitude();
 		slope = (next_amp - current_amp) / current_dur;
-		for(unsigned int i = 0; i < current_dur; i++) {
-			wave_samples[i+offset] = current_amp + slope * i;
+		i = 0;
+		while(i + segment_shift < current_dur) {
+			wave_samples[i + buffer_offset] = current_amp + 
+				slope * (i + segment_shift);
+			i++;
 		}
+		phase = (gendydur_t)i + segment_shift - current_dur;
+		current_wavelength = i + buffer_offset;
 	}
 	// TODO: implement other interpolations
 #ifdef FLEXT_VERSION
@@ -467,15 +478,15 @@ void gendy_waveform::center_breakpoints() {
 			current != breakpoint_list.end(); current++) {
 		// evenly distribute the breakpoints along the waveform
 		current->set_center_duration(average_wavelength / breakpoint_list.size());
-		current->set_max_duration(int(average_wavelength * 10 / 
-					breakpoint_list.size()));
+		current->set_max_duration(average_wavelength * 10 / 
+					breakpoint_list.size());
 
 		if(waveshape == FLAT)
 			current->set_center_amplitude(0);
 		else if(waveshape == SINE)
 			current->set_center_amplitude(sin(2 * M_PI * i / breakpoint_list.size()));
 		else if(waveshape == SQUARE)
-			if((float(i) / breakpoint_list.size()) > 0.5)
+			if((float(i) / breakpoint_list.size()) < 0.5)
 				current->set_center_amplitude(1);
 			else
 				current->set_center_amplitude(-1);

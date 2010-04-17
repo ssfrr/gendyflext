@@ -101,8 +101,6 @@ while(dest == output_vector)
       
 Open Questions:
 
-Should the total cycle length be allowed to vary?
 Are spline and sinc interpolation significantly/audibly different?
-Should the breakpoints gravitate towards a single cycle of sine?
 Do breakpoints have hard boundaries (mirror boundary), elastic boundaries, or none?
 constrain the endpoints to be 0 amplitude for continuity?

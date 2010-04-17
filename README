@@ -1,0 +1,12 @@
+Gendy
+
+Author: Spencer Russell
+
+Gendy is an external for Pure Data and Max/MSP based on Iannis Xenakis' Dynamic Stochastic Synthesis. It is currently in very very alpha stages.
+
+The code that implements DSS is also decoupled from the Pure Data and Max/MSP external code, so it should be relatively easily embeddable in other projects.
+
+For an excellent explanation of DSS, see Sergio Luque's master's thesis:
+http://www.sergioluque.com/thesis.html
+
+One of the departures from cannonical DSS is the introduction of "target waveforms" that the breakpoints gravitate towards. Currently only sinusoidal and square waves are implemented, but implementing new waveforms is trivial, I just haven't done it yet.

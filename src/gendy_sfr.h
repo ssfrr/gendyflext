@@ -95,6 +95,7 @@ class gendy_waveform
 	// eventually debugging info will be switchable on an object-basis
 	bool debug;
 
+	// the following code is Flext-specific
 #ifdef FLEXT_VERSION
 	// buffer to copy to for waveform display
 	flext::buffer *display_buf;

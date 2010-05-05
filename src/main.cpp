@@ -93,8 +93,8 @@ bool gendy::debug = true;
 
 // object class constructor(run at each gendy object creation)
 gendy::gendy() {
-	gendy_count++;
 	id = gendy_count;
+	gendy_count++;
 	if(debug)
 		post("gendy~ #%d: Constructor initiated", id);
 	AddInAnything("control input");	// control input

@@ -13,8 +13,8 @@
 
 using namespace std;
  
-#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 500)
-#error You need at least flext version 0.5.0
+#if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 502)
+#error You need at least flext version 0.5.2
 #endif
 
 // gendy~ version 0.0.1:

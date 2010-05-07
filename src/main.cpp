@@ -51,6 +51,7 @@ class gendy:  public flext_dsp {
 		void set_waveform_square();
 		void set_debug(int new_debug);
 		void set_outbuf(short argc, t_atom *argv);
+		void redraw();
 
 	private:	
 		gendy_waveform waveform;
@@ -61,10 +62,8 @@ class gendy:  public flext_dsp {
 		unsigned int id;
 
 		// waveform display buffer variables
-		buffer *display_buf;
-		t_symbol *display_bufname;
-		bool display;
-		int display_rate;
+		// buffer to copy to for waveform display
+		flext::buffer *display_buf;
 		
 		// Internal class methods
 		static void class_setup(t_classid thisclass);
@@ -87,6 +86,7 @@ class gendy:  public flext_dsp {
 		FLEXT_CALLBACK(set_waveform_square)
 		FLEXT_CALLBACK_I(set_debug)
 		FLEXT_CALLBACK_V(set_outbuf)
+		FLEXT_CALLBACK(redraw)
 };
 unsigned int gendy::gendy_count = 0;
 bool gendy::debug = true;
@@ -102,9 +102,6 @@ gendy::gendy() {
 	AddOutSignal("audio out");		  // audio output
 
 	display_buf = NULL;
-	display = false;
-	//default to displaying every 5 cycles
-	display_rate = 5;
 
 	if(debug)
 		post("gendy~ #%d: Constructor terminated", id);
@@ -137,7 +134,8 @@ void gendy::class_setup(t_classid thisclass) {
 	FLEXT_CADDMETHOD_(thisclass, 0, "sine", set_waveform_sine);
 	FLEXT_CADDMETHOD_(thisclass, 0, "square", set_waveform_square);
 	FLEXT_CADDMETHOD_(thisclass, 0, "debug", set_debug);
-	FLEXT_CADDMETHOD_(thisclass, 0, "display", set_outbuf);
+	FLEXT_CADDMETHOD_(thisclass, 0, "table", set_outbuf);
+	FLEXT_CADDMETHOD_(thisclass, 0, "redraw", redraw);
 	print_log("--- gendy~ by Spencer Russell ---", LOG_INFO);
 	print_log("Class constructor ending", LOG_DEBUG);
 }
@@ -149,7 +147,7 @@ void gendy::class_setup(t_classid thisclass) {
 //  These are arrays of signal vectors(in is a pointer to const pointer to float)
 
 void gendy::m_signal(int n, float *const *in, float *const *out) {
-	waveform.fill_buffer(out[0], n);
+	waveform.get_block(out[0], n);
 }
 
 // Message handling functions
@@ -232,17 +230,10 @@ void gendy::set_debug(int new_debug) {
 void gendy::set_outbuf(short argc, t_atom *argv) {
 	if(argc == 0)
 		// no argument toggles waveform display
-		waveform.display_toggle();
-	else if(argc == 1)
+		print_log("gendy~: missing buffer name", LOG_ERROR);
+	else if(argc == 1) {
 		if(IsFloat(argv[0]))
-			if(GetFloat(argv[0]) == 0)
-				// zero turns display off
-				waveform.display_toggle(false);
-			else {
-				// non-zero numerical argument sets display rate, turns display on
-				waveform.display_toggle(true);
-				waveform.set_display_rate(GetFloat(argv[0]));
-			}
+			print_log("gendy~: invalid buffer name", LOG_ERROR);
 		else if(IsSymbol(argv[0])) {
 			// symbol argument, set output buffer
 			// TODO: better error reporting
@@ -256,9 +247,8 @@ void gendy::set_outbuf(short argc, t_atom *argv) {
 				delete display_buf;
 				display_buf = NULL;
 			}
-			else 
-				waveform.set_display_buffer(display_buf); 
 		}
+	}
 }
 
 // private class methods
@@ -268,6 +258,35 @@ void gendy::set_interpolation(interpolation_t new_interpolation) {
 
 void gendy::set_waveform(waveshape_t new_waveform) {
 	waveform.set_waveshape(new_waveform);
+}
+
+void gendy::redraw() {
+	int n = 0;
+	gendysamp_t *temp_buf;
+
+	if(!display_buf || !display_buf->Ok()) {
+		print_log("gendy-sfr: Invalid Buffer", LOG_ERROR);
+		return;
+	}
+
+	//TODO: is there a way to do this without the temp buffer?
+	flext::buffer::lock_t state = display_buf->Lock();
+	display_buf->Update();
+	// resize table to fit 1 wavelength
+	//display_buf->Frames(current_wavelength, false, false);
+	int bufsize = display_buf->Frames();
+	temp_buf = new gendysamp_t[bufsize];
+	//TODO: this is not threadsafe. wavelength could change.
+	int wavelength = waveform.get_wavelength();
+	waveform.get_cycle(temp_buf, bufsize);
+	// here we copy from the raw float array to the flext buffer object
+	while(n < wavelength && n < bufsize)
+		(*display_buf)[n] = temp_buf[n++];
+	// zero out the rest of the buffer
+	while(n < bufsize)
+		(*display_buf)[n++]= 0;
+	display_buf->Dirty(true);
+	display_buf->Unlock(state);
 }
 
 //register the gendy class as a PD or Max object

@@ -196,11 +196,6 @@ gendy_waveform::gendy_waveform() {
 	set_waveshape(FLAT);
 	copy_index = 0;
 	phase = 0;
-#ifdef FLEXT_VERSION
-	display_buf = NULL;
-	display_rate = 5;
-	display = false;
-#endif
 
 	// start with a single breakpoint that spans the whole wavelength
 	breakpoint_list.push_front(breakpoint(147,0,147,0));
@@ -278,52 +273,10 @@ void gendy_waveform::set_constrain_endpoints(bool constrain) {
 	constrain_endpoints = constrain;
 }
 
-#ifdef FLEXT_VERSION
-void gendy_waveform::display_toggle() {
-	display = !display;
+unsigned int gendy_waveform::get_wavelength() {
+	return current_wavelength;
 }
 
-void gendy_waveform::display_toggle(bool state) {
-	display = state;
-}
-
-void gendy_waveform::set_display_rate(int rate) {
-	if(rate > 0)
-		display_rate = rate;
-}
-
-void gendy_waveform::set_display_buffer(flext::buffer *buf) {
-	display_buf = buf;
-}
-
-// conditionally copies waveform to Flext buffer and marks it dirty
-void gendy_waveform::display_waveform() {
-	static int display_count = 0;
-	int n = 0;
-
-	if(!display_buf || !display_buf->Ok()) {
-		print_log("gendy-sfr: Invalid Buffer", LOG_ERROR);
-		display = false;
-		return;
-	}
-
-	if(++display_count >= display_rate) {
-		flext::buffer::lock_t state = display_buf->Lock();
-		display_buf->Update();
-		// resize table to fit 1 wavelength
-		//display_buf->Frames(current_wavelength, false, false);
-		int bufsize = display_buf->Frames();
-		while(n < current_wavelength && n < bufsize)
-			(*display_buf)[n] = wave_samples[n++];
-		// zero out the rest of the buffer
-		while(n < bufsize)
-			(*display_buf)[n++]= 0;
-		display_count = 0;
-		display_buf->Dirty(true);
-		display_buf->Unlock(state);
-	}
-}
-#endif
 // set new positions for all the breakpoints and update current_wavelength
 // NB: could be easily modified and cleaned up a little if next_first was 
 // stored in the last spot in the breakpoint list, instead of as a separate
@@ -398,10 +351,6 @@ void gendy_waveform::generate_from_breakpoints() {
 		current_wavelength = i + buffer_offset;
 	}
 	// TODO: implement other interpolations
-#ifdef FLEXT_VERSION
-	if(display)
-		display_waveform();
-#endif
 }
 
 // find the biggest space between breakpoints and add a new one
@@ -511,10 +460,10 @@ void gendy_waveform::reset_breakpoints() {
 
 // copies the waveform into a buffer of size n until the buffer is full.  When
 // the waveform is fully copied another cycle is generated.
-unsigned int gendy_waveform::fill_buffer(gendysamp_t *buffer, unsigned int n) {
+unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) {
 	unsigned int samples_copied = 0;
 	// keep track of where in the waveform we're copying from
-	while(samples_copied < n) {
+	while(samples_copied < bufsize) {
 		// if the waveform has been completely copied out, generate a new one
 		if(copy_index == current_wavelength) {
 			move_breakpoints();
@@ -522,10 +471,16 @@ unsigned int gendy_waveform::fill_buffer(gendysamp_t *buffer, unsigned int n) {
 			copy_index = 0;
 		}
 		// copy samples until the output buffer or the waveform buffer runs out
-		while(samples_copied < n && copy_index < current_wavelength)
-			buffer[samples_copied++] = wave_samples[copy_index++];
+		while(samples_copied < bufsize && copy_index < current_wavelength)
+			dest[samples_copied++] = wave_samples[copy_index++];
 	}
 	return samples_copied;
+}
+
+unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) {
+	int i = 0;
+	while(i < bufsize && i < current_wavelength)
+		dest[i] = wave_samples[i++];
 }
 
 // return a uniformly distributed double-precision float between 0 and 1

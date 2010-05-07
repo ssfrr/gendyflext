@@ -95,15 +95,6 @@ class gendy_waveform
 	// eventually debugging info will be switchable on an object-basis
 	bool debug;
 
-	// the following code is Flext-specific
-#ifdef FLEXT_VERSION
-	// buffer to copy to for waveform display
-	flext::buffer *display_buf;
-	// waveform display is written every display_rate cycles
-	int display_rate;
-	bool display;
-#endif
-
 	void move_breakpoints();
 	void generate_from_breakpoints();
 	void add_breakpoint();
@@ -124,15 +115,9 @@ class gendy_waveform
 	void set_amplitude_pull(float new_pull);
 	void set_duration_pull(float new_pull);
 	void set_constrain_endpoints(bool constrain);
-	unsigned int fill_buffer(float *buffer, unsigned int n);
-#ifdef FLEXT_VERSION
-	// display_toggle with no args flips state
-	void display_toggle();
-	void display_toggle(bool state);
-	void set_display_rate(int rate);
-	void set_display_buffer(flext::buffer *buf);
-	void display_waveform();
-#endif
+	unsigned int get_wavelength();
+	unsigned int get_block(gendysamp_t *dest, unsigned int bufsize);
+	unsigned int get_cycle(gendysamp_t *dest, unsigned int bufsize);
 }; //end gendy_waveform class def
 
 // misc utility functions

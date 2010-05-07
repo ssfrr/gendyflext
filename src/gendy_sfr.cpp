@@ -164,19 +164,19 @@ void breakpoint::set_max_duration(gendydur_t new_max) {
 	max_duration = new_max;
 }
 
-gendydur_t breakpoint::get_duration() {
+gendydur_t breakpoint::get_duration() const {
 	return duration;
 }
 
-gendyamp_t breakpoint::get_amplitude() {
+gendyamp_t breakpoint::get_amplitude() const {
 	return amplitude;
 }
 
-gendydur_t breakpoint::get_center_duration() {
+gendydur_t breakpoint::get_center_duration() const {
 	return center_dur;
 }
 
-gendyamp_t breakpoint::get_center_amplitude() {
+gendyamp_t breakpoint::get_center_amplitude() const {
 	return center_amp;
 }
 
@@ -273,7 +273,7 @@ void gendy_waveform::set_constrain_endpoints(bool constrain) {
 	constrain_endpoints = constrain;
 }
 
-unsigned int gendy_waveform::get_wavelength() {
+unsigned int gendy_waveform::get_wavelength() const {
 	return current_wavelength;
 }
 
@@ -477,10 +477,50 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 	return samples_copied;
 }
 
-unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) {
-	int i = 0;
-	while(i < bufsize && i < current_wavelength)
-		dest[i] = wave_samples[i++];
+unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) const {
+	if(interpolation_type == LINEAR) {
+		// we'll be going through the waveform piecewise. next will store
+		// the endpoint of the current section
+		list<breakpoint>::const_iterator next = breakpoint_list.begin();
+		// keep track of how long before a sample boundry the current
+		// segment started. the first segment will start at the beginning of the buffer
+		gendydur_t segment_shift = 0;
+		gendydur_t current_dur, next_dur;
+		gendyamp_t current_amp, next_amp;
+		double slope;
+		current_dur = next->get_duration();
+		current_amp = next->get_amplitude();
+
+		unsigned int buffer_offset = 0;
+		// for each breakpoint 
+		while(++next != breakpoint_list.end()) {
+			next_amp = next->get_amplitude();
+			slope = (next_amp - current_amp) / current_dur;
+			unsigned int i = 0;
+			while(i + segment_shift < current_dur && i + buffer_offset < bufsize) {
+				// slower but no discontuinities TODO:quantify this, is it worth it?
+				// wave_samples[i+offset] = current_amp + i / current_dur * 
+				//		(next_amp - current_amp);
+				dest[i + buffer_offset] = current_amp + 
+					slope * (i + segment_shift);
+				i++;
+			}
+			buffer_offset += i;
+			segment_shift = (gendydur_t)i + segment_shift - current_dur;
+			current_dur = next->get_duration();
+			current_amp = next_amp;
+		}
+		// connect up with the first breakpoint of the next cycle
+		next_amp = next_first.get_amplitude();
+		slope = (next_amp - current_amp) / current_dur;
+		unsigned int i = 0;
+		while(i + segment_shift < current_dur && i + buffer_offset < bufsize) {
+			dest[i + buffer_offset] = current_amp + 
+				slope * (i + segment_shift);
+			i++;
+		}
+		return i + buffer_offset;
+	}
 }
 
 // return a uniformly distributed double-precision float between 0 and 1

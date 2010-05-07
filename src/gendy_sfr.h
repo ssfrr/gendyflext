@@ -53,10 +53,10 @@ class breakpoint
 	void set_center_amplitude(gendyamp_t new_amplitude);
 	void set_center(gendydur_t new_duration, gendyamp_t new_amplitude);
 	void set_max_duration(gendydur_t new_max);
-	gendydur_t get_duration();
-	gendyamp_t get_amplitude();
-	gendydur_t get_center_duration();
-	gendyamp_t get_center_amplitude();
+	gendydur_t get_duration() const;
+	gendyamp_t get_amplitude() const;
+	gendydur_t get_center_duration() const;
+	gendyamp_t get_center_amplitude() const;
 }; //end breakpoint class def
 
 class gendy_waveform
@@ -115,9 +115,9 @@ class gendy_waveform
 	void set_amplitude_pull(float new_pull);
 	void set_duration_pull(float new_pull);
 	void set_constrain_endpoints(bool constrain);
-	unsigned int get_wavelength();
+	unsigned int get_wavelength() const;
 	unsigned int get_block(gendysamp_t *dest, unsigned int bufsize);
-	unsigned int get_cycle(gendysamp_t *dest, unsigned int bufsize);
+	unsigned int get_cycle(gendysamp_t *dest, unsigned int bufsize) const;
 }; //end gendy_waveform class def
 
 // misc utility functions

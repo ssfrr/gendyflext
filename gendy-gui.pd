@@ -1,4 +1,4 @@
-#N canvas 0 692 1375 271 10;
+#N canvas -29 150 1394 398 10;
 #X obj 552 303 gendy~;
 #X obj 298 219 hsl 128 15 50 2000 1 0 \$0-freq \$0-freq_in Freq -2
 -8 0 10 -262144 -1 -1 0 1;
@@ -31,7 +31,7 @@
 -262144 -1 -1 1 1;
 #X obj 1111 125 r \$0-display;
 #X msg 1111 147 display \$1;
-#N canvas 0 0 1375 186 input 0;
+#N canvas 4 49 1375 186 input 0;
 #X obj 154 138 s \$0-h_pull_in;
 #X obj 275 138 s \$0-h_step_in;
 #X obj 403 133 s \$0-v_pull_in;
@@ -48,6 +48,8 @@
 #X msg 968 88 square;
 #X msg 1021 87 sine;
 #X obj 1049 122 s \$0-waveshape_in;
+#X obj 798 78 loadbang;
+#X obj 798 98 f 6;
 #X connect 7 0 9 0;
 #X connect 8 0 5 0;
 #X connect 9 0 0 0;
@@ -64,6 +66,8 @@
 #X connect 11 0 14 0;
 #X connect 12 0 14 0;
 #X connect 13 0 14 0;
+#X connect 15 0 16 0;
+#X connect 16 0 5 0;
 #X restore 810 49 pd input;
 #X obj 61 293 s \$0-breakpoints;
 #X obj 61 259 + 1;
@@ -136,9 +140,9 @@
 #X obj 17 62 hsl 128 15 0 1 0 0 \$0-v_pull \$0-v_pull_in v_pull -2
 -8 0 10 -262144 -1 -1 0 1;
 #X obj 19 98 hsl 128 15 0 1 0 0 \$0-h_step \$0-h_step_in h_step -2
--8 0 10 -262144 -1 -1 0 1;
+-8 0 10 -262144 -1 -1 1600 1;
 #X obj 18 133 hsl 128 15 0 1 0 0 \$0-v_step \$0-v_step_in v_step -2
--8 0 10 -262144 -1 -1 0 1;
+-8 0 10 -262144 -1 -1 4700 1;
 #X coords 0 -1 1 1 142 142 2 10 10;
 #X restore 60 69 pd sliders;
 #X connect 0 0 16 0;

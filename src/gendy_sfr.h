@@ -74,12 +74,12 @@ class gendy_waveform
 	// the internal buffer. The wave grows and shrinks cycle to cycle depending
 	// on the motion of the breakpoints
 	unsigned int current_wavelength;
-	// list of breakpoints
+	// list of breakpoints plus guard points(for continuity)
 	std::list<breakpoint> breakpoint_list;
-	// we store the first breakpoint of the next cycle for continuity
-	breakpoint next_first;
 	// set the type of interpolation(see defines at top)
 	interpolation_t interpolation_type;
+	unsigned int guard_points_pre;
+	unsigned int guard_points_post;
 	// the waveshape that the breakpoints will gravitate to
 	waveshape_t waveshape;
 	// constrain endpoints to 0

@@ -475,30 +475,30 @@ void gendy_waveform::remove_breakpoint() {
 // TODO: sawtooth and triangle
 // TODO: crashes when called on empty breakpoint list
 void gendy_waveform::center_breakpoints() {
-	list<breakpoint>::iterator breakpoint_iter = breakpoint_list.begin();
 	// first_breakpoint and last_breakpoint will hold the boundries
 	// of the real breakpoints (not including guards)
 	list<breakpoint>::iterator first_breakpoint;
 	list<breakpoint>::iterator last_breakpoint;
-	unsigned int breakpoint_count = 0;
 	gendydur_t new_dur;
 	gendyamp_t new_amp;
 
 	// zip through the guard point breakpoints
-	while(breakpoint_count < guard_points_pre) {
-		breakpoint_count++;
+	unsigned int breakpoint_index = 0;
+	list<breakpoint>::iterator breakpoint_iter = breakpoint_list.begin();
+	while(breakpoint_index < guard_points_pre) {
+		breakpoint_index++;
 		breakpoint_iter++;
 	}
 	first_breakpoint = breakpoint_iter;
 
 	int num_breakpoints = breakpoint_list.size() - 
 		guard_points_pre - guard_points_post;
-	while(breakpoint_count < breakpoint_list.size() - guard_points_post) {
+	while(breakpoint_index < breakpoint_list.size() - guard_points_post) {
 		// evenly distribute the breakpoints along the waveform
 		breakpoint_iter->set_center_duration(average_wavelength / num_breakpoints);
 		breakpoint_iter->set_max_duration(average_wavelength * 10 / num_breakpoints);
 
-		float t = (breakpoint_count - guard_points_pre) / num_breakpoints;
+		float t = (breakpoint_index - guard_points_pre) / (float)num_breakpoints;
 		if(waveshape == FLAT)
 			breakpoint_iter->set_center_amplitude(0);
 		else if(waveshape == SINE)
@@ -506,7 +506,7 @@ void gendy_waveform::center_breakpoints() {
 		else if(waveshape == SQUARE)
 			breakpoint_iter->set_center_amplitude(t < 0.5 ? 1 : -1);
 		breakpoint_iter++;
-		breakpoint_count++;
+		breakpoint_index++;
 	}
 	last_breakpoint = --breakpoint_iter;
 	

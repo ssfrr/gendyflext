@@ -191,12 +191,18 @@ gendy_waveform::gendy_waveform() {
 	duration_pull = 0.7;
 	amplitude_pull = 0.4;
 	constrain_endpoints = true;
-	set_interpolation(LINEAR);
 	
 	// start with a single breakpoint that spans the whole wavelength
 	breakpoint_list.push_front(breakpoint(147,0,147,0));
 	// and add an guard point to the end (for linear interpolation)
 	breakpoint_list.push_back(breakpoint(147,0,147,0));
+	// no pre-guard points
+	breakpoints_begin = breakpoint_list.begin();
+	// 1 end guard point, which acts as the end of the list of actual
+	// breakpoints
+	breakpoints_end = --breakpoint_list.end();
+
+	set_interpolation(LINEAR);
 	
 	// set the average wavelength for 300 Hz at 44.1 kHz
 	set_avg_wavelength(147);
@@ -242,6 +248,7 @@ void gendy_waveform::set_avg_wavelength(float new_wavelength) {
 	center_breakpoints();
 }
 
+//TODO: this needs to add the proper number of guard points to the list
 void gendy_waveform::set_interpolation(interpolation_t new_interpolation) {
 	interpolation_type = new_interpolation;
 	if(interpolation_type == LINEAR) {
@@ -297,43 +304,20 @@ unsigned int gendy_waveform::get_wavelength() const {
 
 // set new positions for all the breakpoints and update current_wavelength
 void gendy_waveform::move_breakpoints() {
-	list<breakpoint>::iterator first_breakpoint;
-	list<breakpoint>::iterator last_breakpoint;
 	int breakpoint_count;
 	
-	// zip through the first guard point breakpoints to find the first
-	// breakpoint of the actual list
-	first_breakpoint = breakpoint_list.begin();
-	breakpoint_count = 0;
-	while(breakpoint_count < guard_points_pre) {
-		breakpoint_count++;
-		first_breakpoint++;
-	}
-	// first_breakpoint now points to the first breakpoint after
-	// the pre guard points
-
-	// now we do the same in reverse to find the last real breakpoint
-	last_breakpoint = --breakpoint_list.end();
-	breakpoint_count = 0;
-	while(breakpoint_count < guard_points_post) {
-		breakpoint_count++;
-		last_breakpoint--;
-	}
-	// last_breakpoint now points to the last breakpoint before
-	// the post guard points
-
 	// first we copy the last breakpoints of the current cycle into 
 	// the pre guard points, which represent the past
 	
-	list<breakpoint>::iterator i = first_breakpoint;
-	list<breakpoint>::iterator j = last_breakpoint;
+	list<breakpoint>::iterator i = breakpoints_begin;
+	list<breakpoint>::iterator j = breakpoints_end;
 	while(i != breakpoint_list.begin())
-		*(--i) = *(j--);
+		*(--i) = *(--j);
 
 	// now we copy the post guard points (which represent the first
 	// breakpoints of the next cycle) into the beginning of this cycle
-	i = first_breakpoint;
-	j = ++last_breakpoint;
+	i = breakpoints_begin;
+	j = breakpoints_end;
 	while(j != breakpoint_list.end())
 		*(i++) = *(j++);
 	// i now points to the first breakpoint that needs to be newly calculated.
@@ -475,24 +459,15 @@ void gendy_waveform::remove_breakpoint() {
 // TODO: sawtooth and triangle
 // TODO: crashes when called on empty breakpoint list
 void gendy_waveform::center_breakpoints() {
-	// first_breakpoint and last_breakpoint will hold the boundries
-	// of the real breakpoints (not including guards)
-	list<breakpoint>::iterator first_breakpoint;
-	list<breakpoint>::iterator last_breakpoint;
 	gendydur_t new_dur;
 	gendyamp_t new_amp;
 
-	// zip through the guard point breakpoints
-	unsigned int breakpoint_index = 0;
-	list<breakpoint>::iterator breakpoint_iter = breakpoint_list.begin();
-	while(breakpoint_index < guard_points_pre) {
-		breakpoint_index++;
-		breakpoint_iter++;
-	}
-	first_breakpoint = breakpoint_iter;
+	unsigned int breakpoint_index = guard_points_pre;
+	list<breakpoint>::iterator breakpoint_iter = breakpoints_begin;
 
 	int num_breakpoints = breakpoint_list.size() - 
 		guard_points_pre - guard_points_post;
+
 	while(breakpoint_index < breakpoint_list.size() - guard_points_post) {
 		// evenly distribute the breakpoints along the waveform
 		breakpoint_iter->set_center_duration(average_wavelength / num_breakpoints);
@@ -508,19 +483,18 @@ void gendy_waveform::center_breakpoints() {
 		breakpoint_iter++;
 		breakpoint_index++;
 	}
-	last_breakpoint = --breakpoint_iter;
 	
 	// copy center data starting at the end of the actual breakpoints
 	// into the beginning guard points
-	list<breakpoint>::iterator i = first_breakpoint;
-	list<breakpoint>::iterator j = last_breakpoint;
+	list<breakpoint>::iterator i = breakpoints_begin;
+	list<breakpoint>::iterator j = breakpoints_end;
 	while(i != breakpoint_list.begin())
-		*(--i) = *(j--);
+		*(--i) = *(--j);
 
 	// copy center data starting at the beginning of the actual breakpoints
 	// into the end guard points
-	i = first_breakpoint;
-	j = ++last_breakpoint;
+	i = breakpoints_begin;
+	j = breakpoints_end;
 	while(j != breakpoint_list.end())
 		*(j++) = *(i++);
 }

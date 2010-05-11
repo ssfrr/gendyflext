@@ -76,6 +76,10 @@ class gendy_waveform
 	unsigned int current_wavelength;
 	// list of breakpoints plus guard points(for continuity)
 	std::list<breakpoint> breakpoint_list;
+	// keep track of the first breakpoint after the guard points
+	std::list<breakpoint>::iterator breakpoints_begin;
+	// keep track of the first guard point after the breakpoints
+	std::list<breakpoint>::iterator breakpoints_end;
 	// set the type of interpolation(see defines at top)
 	interpolation_t interpolation_type;
 	unsigned int guard_points_pre;

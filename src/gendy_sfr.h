@@ -68,15 +68,13 @@ class gendy_waveform
 	// list of breakpoints plus guard points(for continuity)
 	std::list<breakpoint> breakpoint_list;
 	// the first breakpoint after the guard points
-	std::list<breakpoint>::iterator breakpoints_begin;
+	std::list<breakpoint>::iterator breakpoint_begin;
 	// the first guard point after the breakpoints
-	std::list<breakpoint>::iterator breakpoints_end;
+	std::list<breakpoint>::iterator breakpoint_end;
 	// the current breakpoint that the next request block will start with
-	std::list<breakpoint>::iterator breakpoints_current;;
+	std::list<breakpoint>::iterator breakpoint_current;;
 	// set the type of interpolation(see defines at top)
 	interpolation_t interpolation_type;
-	unsigned int guard_points_pre;
-	unsigned int guard_points_post;
 	// the waveshape that the breakpoints will gravitate to
 	waveshape_t waveshape;
 	// constrain endpoints to 0

@@ -195,11 +195,11 @@ gendy_waveform::gendy_waveform() {
 	// and add an guard point to the end (for linear interpolation)
 	breakpoint_list.push_back(breakpoint(147,0,147,0));
 	// no pre-guard points
-	breakpoints_begin = breakpoint_list.begin();
-	breakpoints_current = breakpoint_list.begin();
+	breakpoint_begin = breakpoint_list.begin();
+	breakpoint_current = breakpoint_list.begin();
 	// 1 end guard point, which acts as the end of the list of actual
 	// breakpoints
-	breakpoints_end = --breakpoint_list.end();
+	breakpoint_end = --breakpoint_list.end();
 
 	set_interpolation(LINEAR);
 	
@@ -221,13 +221,23 @@ gendy_waveform::~gendy_waveform() {
 //strucutres are set up
 void gendy_waveform::set_num_breakpoints(unsigned int new_size) {
 	if(new_size == 0) {
-		print_log("gendy~: Cannot resize to 0, resizing to 1", LOG_ERROR);
+		print_log("gendy~: Cannot resize to 0, resizing to 1", LOG_INFO);
 		new_size = 1;
 	}
-	unsigned int list_length = new_size + guard_points_pre + guard_points_post;
-	while(breakpoint_list.size() < (list_length))
+
+	unsigned int target_length;
+	if(interpolation_type == LINEAR)
+		target_length = new_size + 1;
+	else if(interpolation_type == CUBIC)
+		target_length = new_size + 3;
+	else {
+		print_log("gendy~: Interpolation type not implemented", LOG_ERROR);
+		assert(0);
+	}
+
+	while(breakpoint_list.size() < (target_length))
 		add_breakpoint();
-	while(breakpoint_list.size() > (list_length))
+	while(breakpoint_list.size() > (target_length))
 		remove_breakpoint();
 	center_breakpoints();
 }
@@ -240,18 +250,6 @@ void gendy_waveform::set_avg_wavelength(float new_wavelength) {
 //TODO: this needs to add the proper number of guard points to the list
 void gendy_waveform::set_interpolation(interpolation_t new_interpolation) {
 	interpolation_type = new_interpolation;
-	if(interpolation_type == LINEAR) {
-		guard_points_pre = 0;
-		guard_points_post = 1;
-	}
-	else if(interpolation_type == CUBIC) {
-		guard_points_pre = 1;
-		guard_points_post = 2;
-	}
-	else {
-		print_log("gendy~: interpolation not implemented", LOG_ERROR);
-		assert(0);
-	}
 }
 
 /*
@@ -290,7 +288,7 @@ void gendy_waveform::set_constrain_endpoints(bool constrain) {
 float gendy_waveform::get_wavelength() const {
 	list<breakpoint>::iterator i;
 	float wavelength = 0;
-	for(i = breakpoints_begin; i != breakpoints_end; i++)
+	for(i = breakpoint_begin; i != breakpoint_end; i++)
 		wavelength += i->get_duration();
 	return wavelength;
 }
@@ -302,15 +300,15 @@ void gendy_waveform::move_breakpoints() {
 	// first we copy the last breakpoints of the current cycle into 
 	// the pre guard points, which represent the past
 	
-	list<breakpoint>::iterator i = breakpoints_begin;
-	list<breakpoint>::iterator j = breakpoints_end;
+	list<breakpoint>::iterator i = breakpoint_begin;
+	list<breakpoint>::iterator j = breakpoint_end;
 	while(i != breakpoint_list.begin())
 		*(--i) = *(--j);
 
 	// now we copy the post guard points (which represent the first
 	// breakpoints of the next cycle) into the beginning of this cycle
-	i = breakpoints_begin;
-	j = breakpoints_end;
+	i = breakpoint_begin;
+	j = breakpoint_end;
 	while(j != breakpoint_list.end())
 		*(i++) = *(j++);
 	// i now points to the first breakpoint that needs to be newly calculated.
@@ -332,24 +330,16 @@ void gendy_waveform::add_breakpoint() {
 
 	gendydur_t longest_dur = 0;
 	list<breakpoint>::iterator longest_dur_breakpoint;
-	list<breakpoint>::iterator breakpoint_iter = breakpoint_list.begin();
-	int breakpoint_count = 0;
-	int longest_breakpoint_count;
-	// zip through the guard point breakpoints
-	while(breakpoint_count < guard_points_pre) {
-		breakpoint_count++;
-		breakpoint_iter++;
-	}
+	list<breakpoint>::iterator breakpoint_iter;
 
-	// find the largest space, not including the end guard points
-	while(breakpoint_count < breakpoint_list.size() - guard_points_post) {
+	// find the longest breakpoint
+	for(breakpoint_iter = breakpoint_begin; 
+			breakpoint_iter != breakpoint_end;
+			breakpoint_iter++) {
 		if((breakpoint_iter->get_duration()) > longest_dur) {
 			longest_dur = breakpoint_iter->get_duration();
 			longest_dur_breakpoint = breakpoint_iter;
-			longest_breakpoint_count = breakpoint_count;
 		}
-		breakpoint_iter++;
-		breakpoint_count++;
 	} 
 
 	// set the duration of the new breakpoint to be half the previous
@@ -374,25 +364,18 @@ void gendy_waveform::remove_breakpoint() {
 	gendydur_t smallest_space = numeric_limits<gendydur_t>::max();
 	gendydur_t space;
 	list<breakpoint>::iterator smallest_space_position;
-	list<breakpoint>::iterator breakpoint_iter = breakpoint_list.begin();
-	int breakpoint_count = 0;
-	int shortest_breakpoint_count;
 	
-	// zip through the guard point breakpoints
-	while(breakpoint_count < guard_points_pre) {
-		breakpoint_count++;
-		breakpoint_iter++;
-	}
-
 	// find the breakpoint closest to the adjacent breakpoints
-	while(breakpoint_count < breakpoint_list.size() - guard_points_post - 1) {
+	list<breakpoint>::iterator breakpoint_iter = breakpoint_begin;
+	list<breakpoint>::iterator breakpoint_last = breakpoint_end;
+	--breakpoint_last;
+	while(breakpoint_iter != breakpoint_last) {
 		space = breakpoint_iter->get_duration() + 
 			(++breakpoint_iter)->get_duration();
 		if(space < smallest_space) {
 			smallest_space = space;
 			smallest_space_position = breakpoint_iter;
 		}
-		breakpoint_count++;
 	} 
 	// erase returns the list element following the erased one
 	smallest_space_position = breakpoint_list.erase(smallest_space_position);
@@ -404,24 +387,23 @@ void gendy_waveform::remove_breakpoint() {
 // center_breakpoints() calculates center positions for all the breakpoints
 // TODO: sawtooth and triangle
 // TODO: crashes when called on empty breakpoint list
-// TODO: seems like we could get rid of the indexing by using
-//       breakpoints_begin and breakpoints_end.
 void gendy_waveform::center_breakpoints() {
 	gendydur_t new_dur;
 	gendyamp_t new_amp;
 
-	unsigned int breakpoint_index = guard_points_pre;
-	list<breakpoint>::iterator breakpoint_iter = breakpoints_begin;
-
-	int num_breakpoints = breakpoint_list.size() - 
-		guard_points_pre - guard_points_post;
-
-	while(breakpoint_index < breakpoint_list.size() - guard_points_post) {
+	list<breakpoint>::iterator breakpoint_iter = breakpoint_begin;
+	unsigned int breakpoint_index = 0;
+	unsigned int num_breakpoints;
+	if(interpolation_type == LINEAR)
+		num_breakpoints = breakpoint_list.size() - 1;
+	else if(interpolation_type == CUBIC)
+		num_breakpoints = breakpoint_list.size() - 3;
+	while(breakpoint_iter != breakpoint_end) {
 		// evenly distribute the breakpoints along the waveform
 		breakpoint_iter->set_center_duration(average_wavelength / num_breakpoints);
 		breakpoint_iter->set_max_duration(average_wavelength * 10 / num_breakpoints);
 
-		float t = (breakpoint_index - guard_points_pre) / (float)num_breakpoints;
+		float t = (breakpoint_index) / (float)num_breakpoints;
 		if(waveshape == FLAT)
 			breakpoint_iter->set_center_amplitude(0);
 		else if(waveshape == SINE)
@@ -434,15 +416,15 @@ void gendy_waveform::center_breakpoints() {
 	
 	// copy center data starting at the end of the actual breakpoints
 	// into the beginning guard points
-	list<breakpoint>::iterator i = breakpoints_begin;
-	list<breakpoint>::iterator j = breakpoints_end;
+	list<breakpoint>::iterator i = breakpoint_begin;
+	list<breakpoint>::iterator j = breakpoint_end;
 	while(i != breakpoint_list.begin())
 		*(--i) = *(--j);
 
 	// copy center data starting at the beginning of the actual breakpoints
 	// into the end guard points
-	i = breakpoints_begin;
-	j = breakpoints_end;
+	i = breakpoint_begin;
+	j = breakpoint_end;
 	while(j != breakpoint_list.end())
 		*(j++) = *(i++);
 }
@@ -467,15 +449,15 @@ void gendy_waveform::reset_breakpoints() {
 unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) {
 	if(interpolation_type == LINEAR) {
 		// assert that we have no pre guard points and at least 1 post guard point
-		assert(breakpoints_begin == breakpoint_list.begin());
-		assert(breakpoints_end != breakpoint_list.end());
+		assert(breakpoint_begin == breakpoint_list.begin());
+		assert(breakpoint_end != breakpoint_list.end());
 		// generate the endpoints for the current segment
-		list<breakpoint>::iterator breakpoints_next = breakpoints_current;
-		breakpoints_next++;
-		gendydur_t current_dur = breakpoints_current->get_duration();
-		gendydur_t current_amp = breakpoints_current->get_amplitude();
-		gendydur_t next_dur = breakpoints_next->get_duration();
-		gendydur_t next_amp = breakpoints_next->get_amplitude();
+		list<breakpoint>::iterator breakpoint_next = breakpoint_current;
+		breakpoint_next++;
+		gendydur_t current_dur = breakpoint_current->get_duration();
+		gendydur_t current_amp = breakpoint_current->get_amplitude();
+		gendydur_t next_dur = breakpoint_next->get_duration();
+		gendydur_t next_amp = breakpoint_next->get_amplitude();
 
 		for(unsigned int i = 0; i < bufsize; i++) {
 			dest[i] = current_amp + phase / current_dur * (next_amp - current_amp);
@@ -486,20 +468,20 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 				current_dur = next_dur;
 				current_amp = next_amp;
 				// if we've reached the end of this cycle
-				if(breakpoints_next == breakpoints_end) {
+				if(breakpoint_next == breakpoint_end) {
 					move_breakpoints();
 					// wrap around the current and next iterators to the beginning
-					breakpoints_current = breakpoints_begin;
-					breakpoints_next = breakpoints_begin;
-					breakpoints_next++;
+					breakpoint_current = breakpoint_begin;
+					breakpoint_next = breakpoint_begin;
+					breakpoint_next++;
 				}
 				else {
 					//just increment both breakpoint iterators
-					breakpoints_current = breakpoints_next;;
-					breakpoints_next++;
+					breakpoint_current = breakpoint_next;;
+					breakpoint_next++;
 				}
-				next_dur = breakpoints_next->get_duration();
-				next_amp = breakpoints_next->get_amplitude();
+				next_dur = breakpoint_next->get_duration();
+				next_amp = breakpoint_next->get_amplitude();
 			}
 		}
 	}
@@ -512,8 +494,9 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 
 unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) const {
 	if(interpolation_type == LINEAR) {
-		assert(guard_points_pre == 0);
-		assert(guard_points_post == 1);
+		// assert that we have no pre guard points and at least 1 post guard point
+		assert(breakpoint_begin == breakpoint_list.begin());
+		assert(breakpoint_end != breakpoint_list.end());
 
 		// we'll be going through the waveform piecewise. next stores 
 		// the endpoint of the current section

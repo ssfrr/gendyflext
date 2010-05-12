@@ -277,8 +277,7 @@ void gendy::redraw() {
 	int bufsize = display_buf->Frames();
 	temp_buf = new gendysamp_t[bufsize];
 	//TODO: this is not threadsafe. wavelength could change.
-	//TODO: not implemented: int wavelength = waveform.get_wavelength();
-	int wavelength = 1024;
+	int wavelength = waveform.get_wavelength();
 	waveform.get_cycle(temp_buf, bufsize);
 	// here we copy from the raw float array to the flext buffer object
 	while(n < wavelength && n < bufsize)

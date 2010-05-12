@@ -61,12 +61,7 @@ class breakpoint
 
 class gendy_waveform
 {
-	// buffer containing the current cycle of the waveform
-	gendysamp_t *wave_samples;
-	unsigned int wave_buffer_size;
-	// keep track of how much of the waveform we've copied out
-	unsigned int copy_index;
-	// keep track of where we are in the waveform (in samples)
+	// keep track of where we are in the current segment(in samples)
 	gendydur_t phase;
 	// average wavelength in samples. 	
 	float average_wavelength;
@@ -117,7 +112,7 @@ class gendy_waveform
 	void set_amplitude_pull(float new_pull);
 	void set_duration_pull(float new_pull);
 	void set_constrain_endpoints(bool constrain);
-	unsigned int get_wavelength() const;
+	float get_wavelength() const;
 	unsigned int get_block(gendysamp_t *dest, unsigned int bufsize);
 	unsigned int get_cycle(gendysamp_t *dest, unsigned int bufsize) const;
 }; //end gendy_waveform class def

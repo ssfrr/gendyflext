@@ -11,3 +11,6 @@ install: gendy~.pd_linux
 
 install-debug: debug
 	cp pd-linux/debug-single/gendy~.pd_linux /usr/local/lib/pd/extra
+
+clean:
+	rm -rf pd-linux src/*.opp

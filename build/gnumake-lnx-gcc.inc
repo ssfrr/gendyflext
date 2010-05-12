@@ -1,0 +1,1 @@
+LIBS += -lgsl -lgslcblas

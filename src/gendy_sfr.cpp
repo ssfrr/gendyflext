@@ -10,6 +10,8 @@
 #include <cstdlib>
 #include <cmath>
 #include <cassert>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_spline.h>
 
 using namespace std;
 
@@ -300,6 +302,8 @@ void gendy_waveform::set_post_guardpoints(unsigned int guardpoints) {
 	//if guardpoints hasn't run out yet, we need some more. copy them.
 	while(guardpoints--)
 		breakpoint_list.push_back(*(src++));
+	//now we put breakpoint_end back where it's supposed to be
+	++breakpoint_end;
 }
 
 void gendy_waveform::set_interpolation(interpolation_t new_interpolation) {
@@ -548,6 +552,26 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 			}
 		}
 	}
+	else if(interpolation_type == CUBIC) {
+		/*list<breakpoint>::const_iterator next = breakpoint_list.begin();
+		gendydur_t dur[4];
+		gendyamp_t amp[4];
+		//collect the 4 points needed to interpolate in the first segment
+		for(int i = 0; i < 4; i++) {
+			dur[i] = next->get_duration();
+			amp[i] = next->get_amplitude();
+			++next;
+		}
+		*/
+		static int samplecount = 0;
+		samplecount += bufsize;
+		if(samplecount > 512) {
+			move_breakpoints();
+			samplecount = 0;
+		}
+		for(int i = 0; i < bufsize; i++)
+			dest[i] = 0;
+	}
 	else {
 		print_log("gendy~: Unimplemeted Interpolation Type", LOG_ERROR);
 		assert(0);
@@ -555,6 +579,7 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 	return bufsize;
 }
 
+//TODO:needs protection against buffer overrun
 unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) const {
 	if(interpolation_type == LINEAR) {
 		assert(get_num_guardpoints() == 1);
@@ -588,6 +613,45 @@ unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) 
 			current_amp = next_amp;
 		}
 		return buffer_offset;
+	}
+	else if(interpolation_type == CUBIC) {
+		assert(get_num_guardpoints() == 3);
+		unsigned int N = breakpoint_list.size();
+		double *x = (double *)malloc(N * sizeof(double));
+		assert(x != 0);
+		double *y = (double *)malloc(N * sizeof(double));
+		assert(y != 0);
+		list<breakpoint>::const_iterator current = breakpoint_list.begin();
+		double guardpoint_offset = 0;
+		while(current != breakpoint_begin) {
+			guardpoint_offset += current->get_duration();
+			current++;
+		}
+		current = breakpoint_list.begin();
+
+		x[0] = -guardpoint_offset;
+		y[0] = current->get_amplitude();
+		for(int i = 1; i < N; i++) {
+			x[i] = x[i-1] + current->get_duration();
+			++current;
+			y[i] = current->get_amplitude();
+		}
+
+		gsl_interp_accel *acc = gsl_interp_accel_alloc();
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, N);
+		gsl_spline_init(spline, x, y, N);
+
+		int i = 0;
+		while(i < x[N-1] && i < bufsize) {
+			dest[i] = gsl_spline_eval(spline, i, acc);
+			i++;
+		}
+
+		gsl_spline_free(spline);
+		gsl_interp_accel_free(acc);
+
+		return i;
+
 	}
 }
 

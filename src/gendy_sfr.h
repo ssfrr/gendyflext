@@ -96,6 +96,8 @@ class gendy_waveform
 	void remove_breakpoint();
 	void center_breakpoints();
 	void reset_breakpoints();
+	void set_pre_guardpoints(unsigned int guardpoints);
+	void set_post_guardpoints(unsigned int guardpoints);
 
 	public:
 	gendy_waveform();

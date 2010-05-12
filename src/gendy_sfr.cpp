@@ -254,9 +254,69 @@ unsigned int gendy_waveform::get_num_breakpoints() const {
 	return num_breakpoints;
 }
 
-//TODO: this needs to add the proper number of guard points to the list
+void gendy_waveform::set_pre_guardpoints(unsigned int guardpoints) {
+	list<breakpoint>::iterator src = breakpoint_end;
+	list<breakpoint>::iterator i = breakpoint_begin;
+	//work backwards from the first breakpoint until:
+	// a) we get to the beginning of the list (more guard points needed)
+	// b) guardpoints goes to 0 (we need to remove guardpoints)
+	// c) both (we have the proper number of guardpoints)
+	//we keep track of src because that's where we'll start copying
+	//guard points from
+	while(guardpoints && i != breakpoint_list.begin()) {
+		--guardpoints;
+		--i;
+		--src;
+	}
+	//if we're not at the beginning of the list yet, delete guard points
+	while(i != breakpoint_list.begin())
+		breakpoint_list.pop_front();
+	//if guardpoints hasn't run out yet, we need some more. copy them.
+	while(guardpoints--)
+		breakpoint_list.push_front(*(src--));
+}
+
+void gendy_waveform::set_post_guardpoints(unsigned int guardpoints) {
+	list<breakpoint>::iterator src = breakpoint_begin;
+	// move breakpoint_end to point at the last breakpoint instead
+	// of the first node after the last breakpoint, so it doesn't
+	// get clobbered
+	--breakpoint_end;
+	list<breakpoint>::iterator i = breakpoint_end;
+	//work forwards from the last breakpoint until:
+	// a) we get to the end of the list (more guard points needed)
+	// b) guardpoints goes to 0 (we need to remove guardpoints)
+	// c) both (we have the proper number of guardpoints)
+	//we keep track of src because that's where we'll start copying
+	//guard points from
+	while(guardpoints && i != --breakpoint_list.end()) {
+		--guardpoints;
+		++i;
+		++src;
+	}
+	//if we're not at the beginning of the list yet, delete guard points
+	while(i != --breakpoint_list.end())
+		breakpoint_list.pop_back();
+	//if guardpoints hasn't run out yet, we need some more. copy them.
+	while(guardpoints--)
+		breakpoint_list.push_back(*(src++));
+}
+
 void gendy_waveform::set_interpolation(interpolation_t new_interpolation) {
-	interpolation_type = new_interpolation;
+	if(new_interpolation == LINEAR) {
+		interpolation_type = LINEAR;
+		set_pre_guardpoints(0);
+		set_post_guardpoints(1);
+	}
+	else if(new_interpolation == CUBIC) {
+		interpolation_type = CUBIC;
+		set_pre_guardpoints(1);
+		set_post_guardpoints(2);
+	}
+	else {
+		print_log("gendy~: unimplemented interpolation. defaulting to linear",
+				LOG_ERROR);
+	}
 }
 
 /*

@@ -111,6 +111,8 @@ class gendy_waveform
 	void set_duration_pull(float new_pull);
 	void set_constrain_endpoints(bool constrain);
 	float get_wavelength() const;
+	unsigned int get_num_breakpoints() const;
+	unsigned int get_num_guardpoints() const;
 	unsigned int get_block(gendysamp_t *dest, unsigned int bufsize);
 	unsigned int get_cycle(gendysamp_t *dest, unsigned int bufsize) const;
 }; //end gendy_waveform class def

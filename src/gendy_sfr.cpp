@@ -225,15 +225,7 @@ void gendy_waveform::set_num_breakpoints(unsigned int new_size) {
 		new_size = 1;
 	}
 
-	unsigned int target_length;
-	if(interpolation_type == LINEAR)
-		target_length = new_size + 1;
-	else if(interpolation_type == CUBIC)
-		target_length = new_size + 3;
-	else {
-		print_log("gendy~: Interpolation type not implemented", LOG_ERROR);
-		assert(0);
-	}
+	unsigned int target_length = new_size + get_num_guardpoints();
 
 	while(breakpoint_list.size() < (target_length))
 		add_breakpoint();
@@ -245,6 +237,21 @@ void gendy_waveform::set_num_breakpoints(unsigned int new_size) {
 void gendy_waveform::set_avg_wavelength(float new_wavelength) {
 	average_wavelength = new_wavelength;
 	center_breakpoints();
+}
+
+
+unsigned int gendy_waveform::get_num_guardpoints() const {
+	return breakpoint_list.size() - get_num_breakpoints();
+}
+
+unsigned int gendy_waveform::get_num_breakpoints() const {
+	list<breakpoint>::const_iterator i = breakpoint_begin;
+	unsigned int num_breakpoints = 0;
+	while(i != breakpoint_end) {
+		++i;
+		++num_breakpoints;
+	}
+	return num_breakpoints;
 }
 
 //TODO: this needs to add the proper number of guard points to the list
@@ -393,11 +400,7 @@ void gendy_waveform::center_breakpoints() {
 
 	list<breakpoint>::iterator breakpoint_iter = breakpoint_begin;
 	unsigned int breakpoint_index = 0;
-	unsigned int num_breakpoints;
-	if(interpolation_type == LINEAR)
-		num_breakpoints = breakpoint_list.size() - 1;
-	else if(interpolation_type == CUBIC)
-		num_breakpoints = breakpoint_list.size() - 3;
+	unsigned int num_breakpoints = get_num_breakpoints();
 	while(breakpoint_iter != breakpoint_end) {
 		// evenly distribute the breakpoints along the waveform
 		breakpoint_iter->set_center_duration(average_wavelength / num_breakpoints);
@@ -494,9 +497,7 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 
 unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) const {
 	if(interpolation_type == LINEAR) {
-		// assert that we have no pre guard points and at least 1 post guard point
-		assert(breakpoint_begin == breakpoint_list.begin());
-		assert(breakpoint_end != breakpoint_list.end());
+		assert(get_num_guardpoints() == 1);
 
 		// we'll be going through the waveform piecewise. next stores 
 		// the endpoint of the current section

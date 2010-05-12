@@ -198,6 +198,7 @@ gendy_waveform::gendy_waveform() {
 	breakpoint_list.push_back(breakpoint(147,0,147,0));
 	// no pre-guard points
 	breakpoints_begin = breakpoint_list.begin();
+	breakpoints_current = breakpoint_list.begin();
 	// 1 end guard point, which acts as the end of the list of actual
 	// breakpoints
 	breakpoints_end = --breakpoint_list.end();
@@ -298,11 +299,7 @@ void gendy_waveform::set_constrain_endpoints(bool constrain) {
 	constrain_endpoints = constrain;
 }
 
-unsigned int gendy_waveform::get_wavelength() const {
-	return current_wavelength;
-}
-
-// set new positions for all the breakpoints and update current_wavelength
+// set new positions for all the breakpoints 
 void gendy_waveform::move_breakpoints() {
 	int breakpoint_count;
 	
@@ -374,7 +371,6 @@ void gendy_waveform::generate_from_breakpoints() {
 			current_amp = next_amp;
 		}
 		phase = (gendydur_t)i + segment_shift - current_dur;
-		current_wavelength = buffer_offset;
 	}
 	// TODO: implement other interpolations
 }
@@ -458,6 +454,8 @@ void gendy_waveform::remove_breakpoint() {
 // center_breakpoints() calculates center positions for all the breakpoints
 // TODO: sawtooth and triangle
 // TODO: crashes when called on empty breakpoint list
+// TODO: seems like we could get rid of the indexing by using
+//       breakpoints_begin and breakpoints_end.
 void gendy_waveform::center_breakpoints() {
 	gendydur_t new_dur;
 	gendyamp_t new_amp;
@@ -509,23 +507,47 @@ void gendy_waveform::reset_breakpoints() {
 				current->get_center_amplitude());
 }
 
-// copies the waveform into a buffer of size n until the buffer is full.  When
-// the waveform is fully copied another cycle is generated.
+/* 
+ * generates a block of gendy audio.
+ * This function will take care of moving the breakpoints when it reaches
+ * the end of a cycle.
+ */
+//TODO: should this really return the number of samples copied? it's always
+//      bufsize
 unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) {
-	unsigned int samples_copied = 0;
-	// keep track of where in the waveform we're copying from
-	while(samples_copied < bufsize) {
-		// if the waveform has been completely copied out, generate a new one
-		if(copy_index == current_wavelength) {
-			move_breakpoints();
-			generate_from_breakpoints();
-			copy_index = 0;
+
+	if(interpolation_type == LINEAR) {
+		assert(guard_points_pre == 0);
+		assert(guard_points_post == 1);
+		// generate the endpoints for the current segment
+		list<breakpoint>::iterator breakpoints_next = breakpoints_current;
+		breakpoints_next++;
+		gendydur_t current_dur = breakpoints_current->get_duration();
+		gendydur_t current_amp = breakpoints_current->get_amplitude();
+		gendydur_t next_dur = breakpoints_next->get_duration();
+		gendydur_t next_amp = breakpoints_next->get_amplitude();
+
+		for(unsigned int i = 0; i < bufsize; i++) {
+			dest[i] = current_amp + phase / current_dur * (next_amp - current_amp);
+			phase++;
+			// if we've reached the end of the current segment
+			if(phase > current_dur) {
+				phase -= current_dur;
+				current_dur = next_dur;
+				current_amp = next_amp;
+				breakpoints_current = breakpoints_next;;
+				breakpoints_next++;
+				next_dur = breakpoints_next->get_duration();
+				next_amp = breakpoints_next->get_amplitude();
+				// if we've reached the end of this cycle
+				if(breakpoints_current == breakpoints_end) {
+					move_breakpoints();
+					breakpoints_current = breakpoints_begin;
+				}
+			}
 		}
-		// copy samples until the output buffer or the waveform buffer runs out
-		while(samples_copied < bufsize && copy_index < current_wavelength)
-			dest[samples_copied++] = wave_samples[copy_index++];
 	}
-	return samples_copied;
+	return bufsize;
 }
 
 unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) const {

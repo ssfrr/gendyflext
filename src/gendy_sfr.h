@@ -70,16 +70,14 @@ class gendy_waveform
 	gendydur_t phase;
 	// average wavelength in samples. 	
 	float average_wavelength;
-	// the wavelength(in samples) of the current cycle of waveform stored in
-	// the internal buffer. The wave grows and shrinks cycle to cycle depending
-	// on the motion of the breakpoints
-	unsigned int current_wavelength;
 	// list of breakpoints plus guard points(for continuity)
 	std::list<breakpoint> breakpoint_list;
-	// keep track of the first breakpoint after the guard points
+	// the first breakpoint after the guard points
 	std::list<breakpoint>::iterator breakpoints_begin;
-	// keep track of the first guard point after the breakpoints
+	// the first guard point after the breakpoints
 	std::list<breakpoint>::iterator breakpoints_end;
+	// the current breakpoint that the next request block will start with
+	std::list<breakpoint>::iterator breakpoints_current;;
 	// set the type of interpolation(see defines at top)
 	interpolation_t interpolation_type;
 	unsigned int guard_points_pre;

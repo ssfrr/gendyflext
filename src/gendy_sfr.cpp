@@ -515,10 +515,10 @@ void gendy_waveform::reset_breakpoints() {
 //TODO: should this really return the number of samples copied? it's always
 //      bufsize
 unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) {
-
 	if(interpolation_type == LINEAR) {
-		assert(guard_points_pre == 0);
-		assert(guard_points_post == 1);
+		// assert that we have no pre guard points and at least 1 post guard point
+		assert(breakpoints_begin == breakpoint_list.begin());
+		assert(breakpoints_end != breakpoint_list.end());
 		// generate the endpoints for the current segment
 		list<breakpoint>::iterator breakpoints_next = breakpoints_current;
 		breakpoints_next++;
@@ -535,17 +535,27 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 				phase -= current_dur;
 				current_dur = next_dur;
 				current_amp = next_amp;
-				breakpoints_current = breakpoints_next;;
-				breakpoints_next++;
+				// if we've reached the end of this cycle
+				if(breakpoints_next == breakpoints_end) {
+					move_breakpoints();
+					// wrap around the current and next iterators to the beginning
+					breakpoints_current = breakpoints_begin;
+					breakpoints_next = breakpoints_begin;
+					breakpoints_next++;
+				}
+				else {
+					//just increment both breakpoint iterators
+					breakpoints_current = breakpoints_next;;
+					breakpoints_next++;
+				}
 				next_dur = breakpoints_next->get_duration();
 				next_amp = breakpoints_next->get_amplitude();
-				// if we've reached the end of this cycle
-				if(breakpoints_current == breakpoints_end) {
-					move_breakpoints();
-					breakpoints_current = breakpoints_begin;
-				}
 			}
 		}
+	}
+	else {
+		print_log("gendy~: Unimplemeted Interpolation Type", LOG_ERROR);
+		assert(0);
 	}
 	return bufsize;
 }

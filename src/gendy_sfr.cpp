@@ -52,7 +52,6 @@ breakpoint::breakpoint() {
 	amplitude = 0;
 	center_dur = 0;
 	center_amp = 0;
-	max_duration = 0;
 }
 
 breakpoint::breakpoint(gendydur_t duration, gendyamp_t amplitude) {
@@ -72,7 +71,6 @@ breakpoint::breakpoint(gendydur_t duration, gendyamp_t amplitude,
 	this->amplitude = amplitude;
 	this->center_dur = center_dur;
 	this->center_amp = center_amp;
-	max_duration = center_dur * 10;
 }
 
 // elastic_move
@@ -86,9 +84,8 @@ breakpoint::breakpoint(gendydur_t duration, gendyamp_t amplitude,
 // v_pull, with a 1 corresponding to immediately jumping to the center point
 // and 0 not pulling toward the center point at all.
 //
-// amplitudes out of the audio range [-1,1] are mirrored back in.  negative
-// durations are mirrored across 0 to become positive. Durations greater 
-// than max_duration are mirrored across max_duration
+// amplitudes out of the audio range [-1,1] are mirrored back in. 
+// durations less than 2 samples are set to 2. 
 //
 void breakpoint::elastic_move(gendydur_t h_step, gendyamp_t v_step, 
 		gendydur_t h_pull, gendyamp_t v_pull) {
@@ -96,18 +93,14 @@ void breakpoint::elastic_move(gendydur_t h_step, gendyamp_t v_step,
 	gendydur_t new_duration;
 	gendyamp_t new_amplitude;
 
-	new_duration = old_duration + h_step * 
-			(h_pull * (center_dur - old_duration) + 
-			(1.0 - h_pull) * gauss() * center_dur);
+	new_duration = old_duration *  
+			pow(center_dur / old_duration,h_pull) * 
+			exp(gauss() *0.1 * h_step * (1.0-h_pull));
 	/*new_duration = old_duration + round((1.0 - h_pull) * h_step * gauss() +
 		(h_pull * (center_dur - old_duration))); */
-	// set mirror boundaries on new_duration
-	do {
-		if(new_duration > max_duration)
-			new_duration = (2 * max_duration) - new_duration;
-		if(new_duration < 0)
-			new_duration = -new_duration;
-	} while (new_duration < 0 || new_duration > max_duration);
+	// set boundaries on new_duration
+	if(new_duration < 2)
+		new_duration = 2;
 	
 	new_amplitude = amplitude + v_step *
 			(v_pull * (center_amp - amplitude) +
@@ -156,11 +149,6 @@ void breakpoint::set_center(gendydur_t new_duration, gendyamp_t new_amplitude) {
 	//TODO: argument sanitization
 	center_dur= new_duration;
 	center_amp = new_amplitude;
-	max_duration = new_duration * 10;
-}
-
-void breakpoint::set_max_duration(gendydur_t new_max) {
-	max_duration = new_max;
 }
 
 gendydur_t breakpoint::get_duration() const {
@@ -464,7 +452,6 @@ void gendy_waveform::center_breakpoints() {
 	while(breakpoint_iter != breakpoint_end) {
 		// evenly distribute the breakpoints along the waveform
 		breakpoint_iter->set_center_duration(average_wavelength / num_breakpoints);
-		breakpoint_iter->set_max_duration(average_wavelength * 10 / num_breakpoints);
 
 		float t = (breakpoint_index) / (float)num_breakpoints;
 		if(waveshape == FLAT)
@@ -501,6 +488,37 @@ void gendy_waveform::reset_breakpoints() {
 		current->set_position(current->get_center_duration(),
 				current->get_center_amplitude());
 }
+
+/*
+ * calculates the spline-interpolated value at x between xp[1] and
+ * xp[2], given 4 points xp,yp
+ * see hotvette's cubic spline tutorial for an explaination of the math
+ */
+double cspline_interp(double *xp, double *yp, double x) {
+	assert(x <= xp[2]);
+	assert(x >= xp[1]);
+	// we'll need a 2nd derivitive at each point
+	double ydd[4];
+	double h[3];
+	for(int i = 0; i < 3; ++i)
+		h[i] = xp[i+1] - xp[i];
+	ydd[0] = 0;
+	ydd[1] = (yp[2] - yp[1]) / h[1] - 
+		(yp[1] - yp[0]) / h[0];
+	ydd[2] = (yp[3] - yp[2]) / h[2] - 
+		(yp[2] - yp[1]) / h[1];
+	ydd[3] = 0;
+	// coefficients of the cubic
+	double a = (ydd[2] - ydd[1]) / (6 * h[1]);
+	double b = ydd[1] / 2;
+	double c = (yp[2] - yp[1]) / h[1] -
+		ydd[2] * h[1] / 6 - ydd[1] * h[1] / 3;
+	double d = yp[1];
+
+	double xo = x - x[1];
+	return a * xo*xo*xo + b * xo*xo + c * xo + d;
+}
+
 
 /* 
  * generates a block of gendy audio.
@@ -564,12 +582,14 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 		//iter is now pointing at the 4th point of this set
 
 		//TODO: maybe make these static or class members to reduce malloc overhead?
-		gsl_interp_accel *acc = gsl_interp_accel_alloc();
+		/*gsl_interp_accel *acc = gsl_interp_accel_alloc();
 		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, 4);
 		gsl_spline_init(spline, x, y, 4);
+		*/
 
 		for(unsigned int i = 0; i < bufsize; i++) {
-			dest[i] = gsl_spline_eval(spline, phase, acc);
+			dest[i] = cspline_interp(x,y,phase);
+			//dest[i] = gsl_spline_eval(spline, phase, acc);
 			//dest[i] = y[1] + phase / (float)x[2] *(y[2] - y[1]);
 			++phase;
 			//if we're past the end of the segment
@@ -590,12 +610,15 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 					++iter;
 					y[i] = iter->get_amplitude();
 				}
+				/*
 				gsl_spline_init(spline, x, y, 4);
 				gsl_interp_accel_reset(acc);
+				*/
 			}
 		}
-		gsl_spline_free(spline);
+		/*gsl_spline_free(spline);
 		gsl_interp_accel_free(acc);
+		*/
 	}
 	else {
 		print_log("gendy~: Unimplemeted Interpolation Type", LOG_ERROR);

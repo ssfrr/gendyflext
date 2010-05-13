@@ -37,7 +37,7 @@ class breakpoint
 
 	// store the center point the breakpoint gravitates to
 	gendyamp_t center_amp;
-	gendydur_t center_dur, max_duration;
+	gendydur_t center_dur;
 
 	public:
 	breakpoint();
@@ -52,7 +52,6 @@ class breakpoint
 	void set_center_duration(gendydur_t new_duration);
 	void set_center_amplitude(gendyamp_t new_amplitude);
 	void set_center(gendydur_t new_duration, gendyamp_t new_amplitude);
-	void set_max_duration(gendydur_t new_max);
 	gendydur_t get_duration() const;
 	gendyamp_t get_amplitude() const;
 	gendydur_t get_center_duration() const;

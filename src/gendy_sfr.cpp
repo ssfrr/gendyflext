@@ -46,10 +46,6 @@ extern void print_log(const char *msg, float arg1, int level){}
 extern void print_log(const char *msg, float arg1, int level){}
 #endif
 
-// wave buffer will be initialized large enough to hold 10
-// seconds of data at 44.1kHz
-const int WAVE_BUFFER_INIT_SIZE = 441000;
-
 breakpoint::breakpoint() {
 	print_log("gendy~: New breakpoint with default args", LOG_DEBUG);
 	duration = 0;
@@ -531,6 +527,8 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 			phase++;
 			// if we've reached the end of the current segment
 			if(phase > current_dur) {
+				breakpoint_current = breakpoint_next;;
+				breakpoint_next++;
 				phase -= current_dur;
 				current_dur = next_dur;
 				current_amp = next_amp;
@@ -542,35 +540,62 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 					breakpoint_next = breakpoint_begin;
 					breakpoint_next++;
 				}
-				else {
-					//just increment both breakpoint iterators
-					breakpoint_current = breakpoint_next;;
-					breakpoint_next++;
-				}
 				next_dur = breakpoint_next->get_duration();
 				next_amp = breakpoint_next->get_amplitude();
 			}
 		}
 	}
 	else if(interpolation_type == CUBIC) {
-		/*list<breakpoint>::const_iterator next = breakpoint_list.begin();
-		gendydur_t dur[4];
-		gendyamp_t amp[4];
+		double x[4];
+		double y[4];
+		// set iter to be the breakpoint before the current one
+		list<breakpoint>::const_iterator iter = breakpoint_current;
+		--iter;
 		//collect the 4 points needed to interpolate in the first segment
-		for(int i = 0; i < 4; i++) {
-			dur[i] = next->get_duration();
-			amp[i] = next->get_amplitude();
-			++next;
+		//x[0] will be negative enough to make x[1]=0, the beginning of 
+		//the segment we're actually interested in here
+		x[0] = -iter->get_duration();
+		y[0] = iter->get_amplitude();
+		for(int i = 1; i < 4; i++) {
+			x[i] = x[i-1] + iter->get_duration();
+			++iter;
+			y[i] = iter->get_amplitude();
 		}
-		*/
-		static int samplecount = 0;
-		samplecount += bufsize;
-		if(samplecount > 512) {
-			move_breakpoints();
-			samplecount = 0;
+		//iter is now pointing at the 4th point of this set
+
+		//TODO: maybe make these static or class members to reduce malloc overhead?
+		gsl_interp_accel *acc = gsl_interp_accel_alloc();
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, 4);
+		gsl_spline_init(spline, x, y, 4);
+
+		for(unsigned int i = 0; i < bufsize; i++) {
+			dest[i] = gsl_spline_eval(spline, phase, acc);
+			//dest[i] = y[1] + phase / (float)x[2] *(y[2] - y[1]);
+			++phase;
+			//if we're past the end of the segment
+			if(phase > x[2]) {
+				++breakpoint_current;
+				phase -= x[2];
+				// if we've reached the end of the current cycle
+				if(breakpoint_current == breakpoint_end) {
+					move_breakpoints();
+					breakpoint_current = breakpoint_begin;
+				}
+				iter = breakpoint_current;
+				--iter;
+				x[0] = -iter->get_duration();
+				y[0] = iter->get_amplitude();
+				for(int i = 1; i < 4; i++) {
+					x[i] = x[i-1] + iter->get_duration();
+					++iter;
+					y[i] = iter->get_amplitude();
+				}
+				gsl_spline_init(spline, x, y, 4);
+				gsl_interp_accel_reset(acc);
+			}
 		}
-		for(int i = 0; i < bufsize; i++)
-			dest[i] = 0;
+		gsl_spline_free(spline);
+		gsl_interp_accel_free(acc);
 	}
 	else {
 		print_log("gendy~: Unimplemeted Interpolation Type", LOG_ERROR);
@@ -649,6 +674,8 @@ unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) 
 
 		gsl_spline_free(spline);
 		gsl_interp_accel_free(acc);
+		free(x);
+		free(y);
 
 		return i;
 

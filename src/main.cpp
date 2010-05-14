@@ -282,6 +282,7 @@ void gendy::redraw() {
 	// here we copy from the raw float array to the flext buffer object
 	while(n < wavelength && n < bufsize)
 		(*display_buf)[n] = temp_buf[n++];
+	delete temp_buf;
 	// zero out the rest of the buffer
 	while(n < bufsize)
 		(*display_buf)[n++]= 0;

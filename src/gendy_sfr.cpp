@@ -418,7 +418,7 @@ void gendy_waveform::remove_breakpoint() {
 	// start smallest_space to be the largest it can be
 	gendydur_t smallest_space = numeric_limits<gendydur_t>::max();
 	gendydur_t space;
-	list<breakpoint>::iterator smallest_space_position;
+	list<breakpoint>::iterator smallest_space_position = breakpoint_list.end();
 	
 	// find the breakpoint closest to the adjacent breakpoints
 	list<breakpoint>::iterator breakpoint_iter = breakpoint_begin;
@@ -432,11 +432,18 @@ void gendy_waveform::remove_breakpoint() {
 			smallest_space_position = breakpoint_iter;
 		}
 	} 
-	// erase returns the list element following the erased one
-	smallest_space_position = breakpoint_list.erase(smallest_space_position);
-	// add the erased breakpoint's duration to the previous breakpoint
-	(--smallest_space_position)->set_duration(smallest_space);
-	//TODO: update guard points if need be
+	if(smallest_space_position != breakpoint_list.end()) {
+		// if the element we're about to erase is the current one
+		if(breakpoint_current == smallest_space_position) {
+			--breakpoint_current;
+			phase += breakpoint_current->get_duration();
+		}
+		// erase returns the list element following the erased one
+		smallest_space_position = breakpoint_list.erase(smallest_space_position);
+		// add the erased breakpoint's duration to the previous breakpoint
+		(--smallest_space_position)->set_duration(smallest_space);
+		//TODO: update guard points if need be
+	}
 }
 
 // center_breakpoints() calculates center positions for all the breakpoints

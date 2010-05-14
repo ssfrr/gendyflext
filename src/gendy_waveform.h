@@ -49,7 +49,7 @@ class gendy_waveform
 	gendy_waveform();
 	~gendy_waveform();
 	//gendy_waveform(float freq);
-	void set_num_breakpoints(unsigned int new_size);
+	void set_num_breakpoints(int new_size);
 	void set_avg_wavelength(float new_wavelength);
 	void set_interpolation(interpolation_t new_interpolation);
 	void set_waveshape(waveshape_t new_waveshape);

@@ -28,7 +28,7 @@ gendy_waveform::gendy_waveform() {
 	// breakpoints
 	breakpoint_end = --breakpoint_list.end();
 
-	set_interpolation(LINEAR);
+	set_interpolation(CUBIC);
 	
 	// set the average wavelength for 300 Hz at 44.1 kHz
 	set_avg_wavelength(147);
@@ -46,9 +46,9 @@ gendy_waveform::~gendy_waveform() {
 
 //TODO: protect against this getting called before data
 //strucutres are set up
-void gendy_waveform::set_num_breakpoints(unsigned int new_size) {
-	if(new_size == 0) {
-		print_log("gendy~: Cannot resize to 0, resizing to 1", LOG_INFO);
+void gendy_waveform::set_num_breakpoints(int new_size) {
+	if(new_size <= 0) {
+		print_log("gendy~: Cannot resize to less than 1, resizing to 1", LOG_INFO);
 		new_size = 1;
 	}
 

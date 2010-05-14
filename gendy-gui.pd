@@ -1,19 +1,18 @@
 #N canvas 4 592 1369 398 10;
 #X obj 552 303 gendy~;
 #X obj 298 219 hsl 128 15 50 2000 1 0 \$0-freq \$0-freq_in Freq -2
--8 0 10 -262144 -1 -1 0 1;
+-8 0 10 -262144 -1 -1 2386 1;
 #X msg 527 153 h_pull \$1;
 #X msg 706 153 v_pull \$1;
 #X msg 618 154 h_step \$1;
 #X msg 804 153 v_step \$1;
 #X msg 981 152 breakpoints \$1;
-#X floatatom 216 227 5 0 0 0 - #0-breakpoints -;
-#N canvas 0 0 1375 186 (subpatch) 0;
+#X floatatom 64 229 5 0 0 2 Breakpoints #0-breakpoints_in #0-breakpoints
+;
+#N canvas 4 49 1369 186 (subpatch) 0;
 #X array \$0-waveform 1000 float 2;
 #X coords 0 1 1000 -1 150 100 1;
 #X restore 288 69 graph;
-#X obj 61 226 hradio 15 1 0 10 empty \$0-breakpoints_in Breakpoints
-0 -8 0 10 -262144 -1 -1 6;
 #X obj 527 126 r \$0-h_pull;
 #X obj 618 128 r \$0-h_step;
 #X obj 706 125 r \$0-v_pull;
@@ -29,14 +28,14 @@
 #X obj 321 172 tgl 15 0 \$0-display \$0-display_in Display 20 7 0 10
 -262144 -1 -1 1 1;
 #X obj 1113 85 r \$0-display;
-#N canvas 6 73 1375 186 input 0;
-#X obj 154 138 s \$0-h_pull_in;
-#X obj 275 138 s \$0-h_step_in;
-#X obj 403 133 s \$0-v_pull_in;
-#X obj 519 127 s \$0-v_step_in;
-#X obj 647 127 s \$0-freq_in;
-#X obj 761 125 s \$0-breakpoints_in;
-#X obj 909 129 s \$0-display_in;
+#N canvas 4 203 1369 378 input 0;
+#X obj 145 303 s \$0-h_pull_in;
+#X obj 266 303 s \$0-h_step_in;
+#X obj 394 298 s \$0-v_pull_in;
+#X obj 510 292 s \$0-v_step_in;
+#X obj 638 292 s \$0-freq_in;
+#X obj 752 290 s \$0-breakpoints_in;
+#X obj 900 294 s \$0-display_in;
 #X obj 515 17 inlet;
 #X obj 761 88 - 1;
 #X obj 515 42 route h_pull h_step v_pull v_step freq breakpoints display
@@ -45,9 +44,16 @@
 #X msg 918 86 flat;
 #X msg 968 88 square;
 #X msg 1021 87 sine;
-#X obj 1049 122 s \$0-waveshape_in;
-#X obj 798 78 loadbang;
-#X obj 798 98 f 6;
+#X obj 1040 287 s \$0-waveshape_in;
+#X obj 1085 167 loadbang;
+#X msg 212 271 0.1;
+#X msg 324 274 0.5;
+#X msg 444 271 0.5;
+#X msg 559 262 0.5;
+#X msg 681 259 100;
+#X msg 769 261 7;
+#X msg 912 261 1;
+#X msg 1062 256 sine;
 #X connect 7 0 9 0;
 #X connect 8 0 5 0;
 #X connect 9 0 0 0;
@@ -64,21 +70,30 @@
 #X connect 11 0 14 0;
 #X connect 12 0 14 0;
 #X connect 13 0 14 0;
+#X connect 15 0 23 0;
+#X connect 15 0 22 0;
+#X connect 15 0 21 0;
+#X connect 15 0 20 0;
+#X connect 15 0 19 0;
+#X connect 15 0 18 0;
+#X connect 15 0 17 0;
 #X connect 15 0 16 0;
-#X connect 16 0 5 0;
+#X connect 16 0 0 0;
+#X connect 17 0 1 0;
+#X connect 18 0 2 0;
+#X connect 19 0 3 0;
+#X connect 20 0 4 0;
+#X connect 21 0 5 0;
+#X connect 22 0 6 0;
+#X connect 23 0 14 0;
 #X restore 810 49 pd input;
-#X obj 61 293 s \$0-breakpoints;
-#X obj 61 259 + 1;
-#X obj 903 20 loadbang;
-#X msg 903 42 1;
-#X obj 903 64 s \$0-display_in;
 #N canvas 0 691 1375 186 waveshape 0;
 #X obj 31 31 cnv 15 68 88 empty empty Waveshape 3 9 0 12 -233017 -66577
 0;
 #X obj 39 55 tgl 15 0 \$0-square \$0-square_in Square 17 7 0 10 -262144
 -1 -1 0 1;
 #X obj 39 75 tgl 15 0 \$0-sine \$0-sine_in Sine 17 7 0 10 -262144 -1
--1 0 1;
+-1 1 1;
 #X obj 39 95 tgl 15 0 \$0-flat \$0-flat_in Flat 17 7 0 10 -262144 -1
 -1 0 1;
 #X obj 283 139 r \$0-square;
@@ -130,63 +145,55 @@
 #X coords 0 -1 1 1 70 90 2 30 30;
 #X restore 210 69 pd waveshape;
 #X obj 1218 145 r \$0-waveshape;
-#N canvas 0 692 1375 271 sliders 0;
+#N canvas 4 716 1369 271 sliders 0;
 #X obj 11 11 cnv 15 140 140 empty empty empty 20 12 0 14 -233017 -66577
 0;
-#X obj 16 27 hsl 128 15 0 1 0 0 \$0-h_pull \$0-h_pull_in h_pull -2
--8 0 10 -262144 -1 -1 0 1;
+#X obj 16 27 hsl 128 15 0.0001 1 1 0 \$0-h_pull \$0-h_pull_in h_pull
+-2 -8 0 10 -262144 -1 -1 9525 1;
 #X obj 17 62 hsl 128 15 0 1 0 0 \$0-v_pull \$0-v_pull_in v_pull -2
--8 0 10 -262144 -1 -1 0 1;
+-8 0 10 -262144 -1 -1 6350 1;
 #X obj 19 98 hsl 128 15 0 1 0 0 \$0-h_step \$0-h_step_in h_step -2
--8 0 10 -262144 -1 -1 0 1;
+-8 0 10 -262144 -1 -1 6350 1;
 #X obj 18 133 hsl 128 15 0 1 0 0 \$0-v_step \$0-v_step_in v_step -2
--8 0 10 -262144 -1 -1 0 1;
+-8 0 10 -262144 -1 -1 6350 1;
 #X coords 0 -1 1 1 142 142 2 10 10;
 #X restore 60 69 pd sliders;
 #X msg 1113 145 redraw;
 #X msg 489 81 table \$1-waveform;
 #X obj 1113 123 metro 75;
 #X msg 1183 124 display \$1;
-#X msg 482 222 cubic;
-#X msg 474 256 linear;
-#X obj 482 183 loadbang;
 #X obj 1115 30 block~ 1024;
-#X connect 0 0 16 0;
+#N canvas 4 49 1166 300 init 0;
+#X restore 699 47 pd init;
+#X connect 0 0 15 0;
 #X connect 2 0 0 0;
-#X connect 2 0 18 0;
+#X connect 2 0 17 0;
 #X connect 3 0 0 0;
-#X connect 3 0 18 0;
+#X connect 3 0 17 0;
 #X connect 4 0 0 0;
-#X connect 4 0 18 0;
+#X connect 4 0 17 0;
 #X connect 5 0 0 0;
-#X connect 5 0 18 0;
+#X connect 5 0 17 0;
 #X connect 6 0 0 0;
-#X connect 6 0 18 0;
-#X connect 9 0 26 0;
-#X connect 10 0 2 0;
-#X connect 11 0 4 0;
-#X connect 12 0 3 0;
-#X connect 13 0 5 0;
-#X connect 14 0 19 0;
-#X connect 15 0 6 0;
-#X connect 17 0 24 0;
-#X connect 19 0 18 0;
-#X connect 19 0 0 0;
-#X connect 20 0 21 0;
-#X connect 21 0 34 0;
-#X connect 23 0 35 0;
-#X connect 23 0 36 0;
-#X connect 26 0 25 0;
-#X connect 27 0 28 0;
-#X connect 28 0 29 0;
-#X connect 31 0 0 0;
-#X connect 31 0 18 0;
-#X connect 33 0 0 0;
-#X connect 33 0 18 0;
-#X connect 34 0 0 0;
-#X connect 35 0 33 0;
-#X connect 36 0 18 0;
-#X connect 37 0 0 0;
-#X connect 38 0 0 0;
-#X connect 39 0 37 0;
+#X connect 6 0 17 0;
+#X connect 9 0 2 0;
+#X connect 10 0 4 0;
+#X connect 11 0 3 0;
+#X connect 12 0 5 0;
+#X connect 13 0 18 0;
+#X connect 14 0 6 0;
+#X connect 16 0 23 0;
+#X connect 18 0 17 0;
+#X connect 18 0 0 0;
+#X connect 19 0 20 0;
+#X connect 20 0 28 0;
+#X connect 22 0 29 0;
+#X connect 22 0 30 0;
+#X connect 25 0 0 0;
+#X connect 25 0 17 0;
+#X connect 27 0 0 0;
+#X connect 27 0 17 0;
+#X connect 28 0 0 0;
+#X connect 29 0 27 0;
+#X connect 30 0 17 0;
 #X coords 0 -1 1 1 400 200 1 50 50;

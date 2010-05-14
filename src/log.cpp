@@ -1,4 +1,5 @@
 #include "log.h"
+#include "m_pd.h"
 
 // shows msg if allowed by LOG_LEVEL
 #ifdef PD_MAJOR_VERSION
@@ -26,7 +27,8 @@ void print_log(const char *msg, float arg1, int level){
   }
 }
 #else
-void print_log(char *msg, int level) {}
+#error
+void print_log(const char *msg, int level) {}
 void print_log(const char *msg, int arg1, int level) {}
 void print_log(const char *msg, unsigned int arg1, int level) {}
 void print_log(const char *msg, float arg1, int level){}

@@ -1,11 +1,37 @@
+/*********************************************
+ *
+ * libgendy
+ *
+ * a library implementing Iannis Xenakis's Dynamic Stochastic Synthesis
+ *
+ * Copyright 2009,2010 Spencer Russell
+ * Released under the GPLv3
+ *
+ * This file is part of libgendy.
+ *
+ * libgendy is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * libgendy is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * libgendy.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ ********************************************/
+
+
+
+
 // gendy~ - an implementation of Iannis Xenakis' Dynamic
 // Stochastic Synthesis as an object for Pure Data.
 //
 // This project uses Thomas Grill's Flext framework, which
 // is necessary to compile and run it.
-//
-// Released under the GPL v3, copyright (c) 2009 Spencer Russell
-//
 
 #ifndef GENDY_H
 #define GENDY_H
@@ -16,7 +42,7 @@ const int GENDY_MAJ = 0;
 const int GENDY_MIN = 6;
 const int GENDY_REV = 0;
 
-// A flext dsp external ("tilde object") inherits from the class flext_dsp 
+// A flext dsp external ("tilde object") inherits from the class flext_dsp
 class gendy:  public flext_dsp {
 	// flext macro magic
 	FLEXT_HEADER_S(gendy, flext_dsp, class_setup)

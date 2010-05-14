@@ -1,10 +1,37 @@
+/*********************************************
+ *
+ * libgendy
+ *
+ * a library implementing Iannis Xenakis's Dynamic Stochastic Synthesis
+ *
+ * Copyright 2009,2010 Spencer Russell
+ * Released under the GPLv3
+ *
+ * This file is part of libgendy.
+ *
+ * libgendy is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * libgendy is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * libgendy.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ ********************************************/
+
+
+
+
 // gendy~ - an implementation of Iannis Xenakis' Dynamic
 // Stochastic Synthesis as an object for Pure Data.
 //
 // This project uses Thomas Grill's Flext framework, which
 // is necessary to compile and run it.
-//
-// Released under the GPL v3, copyright (c) 2009 Spencer Russell
 //
 
 #include <math.h>
@@ -13,7 +40,7 @@
 #include "log.h"
 
 using namespace std;
- 
+
 #if !defined(FLEXT_VERSION) || (FLEXT_VERSION < 502)
 #error You need at least flext version 0.5.2
 #endif
@@ -65,16 +92,16 @@ void gendy::class_setup(t_classid thisclass) {
 	FLEXT_CADDMETHOD_(thisclass, 0, "table", set_outbuf);
 	FLEXT_CADDMETHOD_(thisclass, 0, "redraw", redraw);
 	print_log("",LOG_INFO);
-	print_log("-- gendy~ v%d.%d.%d by Spencer Russell --", 
+	print_log("-- gendy~ v%d.%d.%d by Spencer Russell --",
 			GENDY_MAJ, GENDY_MIN, GENDY_REV, LOG_INFO);
 	print_log("gendy~: please report bugs to http://code.airwav.es/projects/gendy/issues", LOG_INFO);
 	print_log("Class constructor ending", LOG_DEBUG);
 }
 
 // Now we define our DSP function. It gets these arguments:
-// 
+//
 // n: length of signal vector.
-// float *const *in, float *const *out: 
+// float *const *in, float *const *out:
 //  These are arrays of signal vectors(in is a pointer to const pointer to float)
 
 void gendy::m_signal(int n, float *const *in, float *const *out) {

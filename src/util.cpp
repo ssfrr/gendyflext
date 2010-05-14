@@ -1,3 +1,32 @@
+/*********************************************
+ *
+ * libgendy
+ *
+ * a library implementing Iannis Xenakis's Dynamic Stochastic Synthesis
+ *
+ * Copyright 2009,2010 Spencer Russell
+ * Released under the GPLv3
+ *
+ * This file is part of libgendy.
+ *
+ * libgendy is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * libgendy is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * libgendy.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ ********************************************/
+
+
+
+
 #include "util.h"
 #include <math.h>
 #include <cstdlib>
@@ -13,7 +42,7 @@ double randf() {
 double gauss() {
 	double x, y, r2;
 	do {
-		/* choose x,y in uniform square (-1,-1) to (+1,+1) */ 
+		/* choose x,y in uniform square (-1,-1) to (+1,+1) */
 		x = -1 + 2 * randf();
 		y = -1 + 2 * randf();
 

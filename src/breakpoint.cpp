@@ -1,3 +1,32 @@
+/*********************************************
+ *
+ * libgendy
+ *
+ * a library implementing Iannis Xenakis's Dynamic Stochastic Synthesis
+ *
+ * Copyright 2009,2010 Spencer Russell
+ * Released under the GPLv3
+ *
+ * This file is part of libgendy.
+ *
+ * libgendy is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * libgendy is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * libgendy.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ ********************************************/
+
+
+
+
 #include "breakpoint.h"
 #include "log.h"
 #include <cmath>
@@ -41,17 +70,17 @@ breakpoint::breakpoint(gendydur_t duration, gendyamp_t amplitude,
 // v_pull, with a 1 corresponding to immediately jumping to the center point
 // and 0 not pulling toward the center point at all.
 //
-// amplitudes out of the audio range [-1,1] are mirrored back in. 
-// durations less than 2 samples are set to 2. 
+// amplitudes out of the audio range [-1,1] are mirrored back in.
+// durations less than 2 samples are set to 2.
 //
-void breakpoint::elastic_move(gendydur_t h_step, gendyamp_t v_step, 
+void breakpoint::elastic_move(gendydur_t h_step, gendyamp_t v_step,
 		gendydur_t h_pull, gendyamp_t v_pull) {
 	gendydur_t old_duration = duration;
 	gendydur_t new_duration;
 	gendyamp_t new_amplitude;
 
-	new_duration = old_duration *  
-			pow(center_dur / old_duration,h_pull * h_step) * 
+	new_duration = old_duration *
+			pow(center_dur / old_duration,h_pull * h_step) *
 			exp(gauss() *0.1 * h_step * (1.0-h_pull));
 	/*new_duration = old_duration + round((1.0 - h_pull) * h_step * gauss() +
 		(h_pull * (center_dur - old_duration))); */

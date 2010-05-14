@@ -1,3 +1,32 @@
+/*********************************************
+ *
+ * libgendy
+ *
+ * a library implementing Iannis Xenakis's Dynamic Stochastic Synthesis
+ *
+ * Copyright 2009,2010 Spencer Russell
+ * Released under the GPLv3
+ *
+ * This file is part of libgendy.
+ *
+ * libgendy is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * libgendy is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * libgendy.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ ********************************************/
+
+
+
+
 #include "gendy_waveform.h"
 #include "log.h"
 #include "splines.h"
@@ -189,11 +218,11 @@ float gendy_waveform::get_wavelength() const {
 	return wavelength;
 }
 
-// set new positions for all the breakpoints 
+// set new positions for all the breakpoints
 void gendy_waveform::move_breakpoints() {
 	int breakpoint_count;
 	
-	// first we copy the last breakpoints of the current cycle into 
+	// first we copy the last breakpoints of the current cycle into
 	// the pre guard points, which represent the past
 	
 	list<breakpoint>::iterator i = breakpoint_begin;
@@ -221,7 +250,7 @@ void gendy_waveform::move_breakpoints() {
 
 // adds a breakpoint by splitting the longest breakpoint into two
 void gendy_waveform::add_breakpoint() {
-	gendydur_t new_duration; 
+	gendydur_t new_duration;
 	gendyamp_t new_amplitude;
 
 	gendydur_t longest_dur = 0;
@@ -229,26 +258,26 @@ void gendy_waveform::add_breakpoint() {
 	list<breakpoint>::iterator breakpoint_iter;
 
 	// find the longest breakpoint
-	for(breakpoint_iter = breakpoint_begin; 
+	for(breakpoint_iter = breakpoint_begin;
 			breakpoint_iter != breakpoint_end;
 			breakpoint_iter++) {
 		if((breakpoint_iter->get_duration()) > longest_dur) {
 			longest_dur = breakpoint_iter->get_duration();
 			longest_dur_breakpoint = breakpoint_iter;
 		}
-	} 
+	}
 
 	// set the duration of the new breakpoint to be half the previous
 	new_duration = longest_dur_breakpoint->get_duration() / 2;
 	// halve the duration of the previous breakpoint
 	longest_dur_breakpoint->set_duration(new_duration);
 	// set the new amplitude to be the average of the 2 adjacent breakpoints
-	// and move longest_dur_breakpoint iterator to the next breakpoint 
+	// and move longest_dur_breakpoint iterator to the next breakpoint
 	// for insertion
-	new_amplitude = (longest_dur_breakpoint->get_amplitude() + 
+	new_amplitude = (longest_dur_breakpoint->get_amplitude() +
 			(++longest_dur_breakpoint)->get_amplitude()) / 2;
 	// insert the breakpoint in the list
-	breakpoint_list.insert(longest_dur_breakpoint, 
+	breakpoint_list.insert(longest_dur_breakpoint,
 			breakpoint(new_duration, new_amplitude));
 	//TODO: copy data to guard points if need be
 }
@@ -266,13 +295,13 @@ void gendy_waveform::remove_breakpoint() {
 	list<breakpoint>::iterator breakpoint_last = breakpoint_end;
 	--breakpoint_last;
 	while(breakpoint_iter != breakpoint_last) {
-		space = breakpoint_iter->get_duration() + 
+		space = breakpoint_iter->get_duration() +
 			(++breakpoint_iter)->get_duration();
 		if(space < smallest_space) {
 			smallest_space = space;
 			smallest_space_position = breakpoint_iter;
 		}
-	} 
+	}
 	if(smallest_space_position != breakpoint_list.end()) {
 		// if the element we're about to erase is the current one
 		if(breakpoint_current == smallest_space_position) {
@@ -331,14 +360,14 @@ void gendy_waveform::center_breakpoints() {
 // center positions
 void gendy_waveform::reset_breakpoints() {
 	list<breakpoint>::iterator current;
-	for(current = breakpoint_list.begin(); 
+	for(current = breakpoint_list.begin();
 			current != breakpoint_list.end(); current++)
 		current->set_position(current->get_center_duration(),
 				current->get_center_amplitude());
 }
 
 
-/* 
+/*
  * generates a block of gendy audio.
  * This function will take care of moving the breakpoints when it reaches
  * the end of a cycle.
@@ -389,7 +418,7 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 		list<breakpoint>::const_iterator iter = breakpoint_current;
 		--iter;
 		//collect the 4 points needed to interpolate in the first segment
-		//x[0] will be negative enough to make x[1]=0, the beginning of 
+		//x[0] will be negative enough to make x[1]=0, the beginning of
 		//the segment we're actually interested in here
 		x[0] = -iter->get_duration();
 		y[0] = iter->get_amplitude();
@@ -439,7 +468,7 @@ unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) 
 	if(interpolation_type == LINEAR) {
 		assert(get_num_guardpoints() == 1);
 
-		// we'll be going through the waveform piecewise. next stores 
+		// we'll be going through the waveform piecewise. next stores
 		// the endpoint of the current section
 		list<breakpoint>::const_iterator next = breakpoint_list.begin();
 		// keep track of how long before a sample boundry the current
@@ -452,13 +481,13 @@ unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) 
 		current_amp = next->get_amplitude();
 
 		unsigned int buffer_offset = 0;
-		// for each breakpoint 
+		// for each breakpoint
 		while(++next != breakpoint_list.end()) {
 			next_amp = next->get_amplitude();
 			slope = (next_amp - current_amp) / current_dur;
 			unsigned int i = 0;
 			while(i + segment_shift < current_dur && i + buffer_offset < bufsize) {
-				dest[i + buffer_offset] = current_amp + 
+				dest[i + buffer_offset] = current_amp +
 					slope * (i + segment_shift);
 				i++;
 			}
@@ -475,11 +504,11 @@ unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) 
 		double y[4];
 		double coefs[4];
 		double x_in = 0;
-		// set iter to be the first guard breakpoint 
+		// set iter to be the first guard breakpoint
 		list<breakpoint>::const_iterator iter = breakpoint_begin;
 		--iter;
 		//collect the 4 points needed to interpolate in the first segment
-		//x[0] will be negative enough to make x[1]=0, the beginning of 
+		//x[0] will be negative enough to make x[1]=0, the beginning of
 		//the segment we're actually interested in here
 		x[0] = -iter->get_duration();
 		y[0] = iter->get_amplitude();

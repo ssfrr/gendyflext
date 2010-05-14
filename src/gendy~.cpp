@@ -64,7 +64,10 @@ void gendy::class_setup(t_classid thisclass) {
 	FLEXT_CADDMETHOD_(thisclass, 0, "debug", set_debug);
 	FLEXT_CADDMETHOD_(thisclass, 0, "table", set_outbuf);
 	FLEXT_CADDMETHOD_(thisclass, 0, "redraw", redraw);
-	print_log("--- gendy~ by Spencer Russell ---", LOG_INFO);
+	print_log("",LOG_INFO);
+	print_log("-- gendy~ v%d.%d.%d by Spencer Russell --", 
+			GENDY_MAJ, GENDY_MIN, GENDY_REV, LOG_INFO);
+	print_log("gendy~: please report bugs to http://code.airwav.es/projects/gendy/issues", LOG_INFO);
 	print_log("Class constructor ending", LOG_DEBUG);
 }
 

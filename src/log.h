@@ -11,6 +11,7 @@
 
 void print_log(const char *msg, int level);
 void print_log(const char *msg, int arg1, int level);
+void print_log(const char *msg, int arg1, int arg2, int arg3, int level);
 void print_log(const char *msg, unsigned int arg1, int level);
 void print_log(const char *msg, float arg1, int level);
 

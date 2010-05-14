@@ -489,34 +489,33 @@ void gendy_waveform::reset_breakpoints() {
 				current->get_center_amplitude());
 }
 
-/*
- * calculates the spline-interpolated value at x between xp[1] and
- * xp[2], given 4 points xp,yp
- * see hotvette's cubic spline tutorial for an explaination of the math
- */
-double cspline_interp(double *xp, double *yp, double x) {
-	assert(x <= xp[2]);
-	assert(x >= xp[1]);
-	// we'll need a 2nd derivitive at each point
-	double ydd[4];
+void get_cspline_coefs(double *xp, double *yp, double *coefs) {
 	double h[3];
-	for(int i = 0; i < 3; ++i)
+	// h[n] is the x-distance between x[n] and x[n+1]
+	for(int i = 0; i < 3; i++)
 		h[i] = xp[i+1] - xp[i];
-	ydd[0] = 0;
-	ydd[1] = (yp[2] - yp[1]) / h[1] - 
-		(yp[1] - yp[0]) / h[0];
-	ydd[2] = (yp[3] - yp[2]) / h[2] - 
-		(yp[2] - yp[1]) / h[1];
-	ydd[3] = 0;
-	// coefficients of the cubic
-	double a = (ydd[2] - ydd[1]) / (6 * h[1]);
-	double b = ydd[1] / 2;
-	double c = (yp[2] - yp[1]) / h[1] -
-		ydd[2] * h[1] / 6 - ydd[1] * h[1] / 3;
-	double d = yp[1];
+	// d[i] is the slope of the line segment connecting point i
+	// to point i+1
+	double d[3];
+	for(int i = 0; i < 3; i++) 
+		d[i] = (yp[i+1] - yp[i]) / h[i];
+	//yd[n] is the derivitive of f(x) at xp[1] and xp[2]. It's a
+	//weighted average of the two adjacent line segments
+	double yd[3];
+	for(int i = 1; i < 3; i++) 
+		yd[i] = (d[i] * h[i-1] + d[i-1] * h[i]) / (h[i-1] + h[i]);
+	// Here we actually calculate the coefficients
+	coefs[0] = (h[1]*(yd[2] - yd[1]) - 
+			2 * (yp[2] - yp[1] - h[1] * yd[1])) / (h[1] * h[1] * h[1]);
+	coefs[1] = (3 * (yp[2] - yp[1] - h[1] * yd[1]) - 
+			h[1] * (yd[2] - yd[1])) / (h[1] * h[1]);
+	coefs[2] = yd[1];
+	coefs[3] = yp[1];
 
-	double xo = x - x[1];
-	return a * xo*xo*xo + b * xo*xo + c * xo + d;
+}
+
+double cspline_interp(double *coefs, double x) {
+	return coefs[3] + x * (coefs[2] + x * (coefs[1] + coefs[0] * x));
 }
 
 
@@ -566,6 +565,7 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 	else if(interpolation_type == CUBIC) {
 		double x[4];
 		double y[4];
+		double coefs[4];
 		// set iter to be the breakpoint before the current one
 		list<breakpoint>::const_iterator iter = breakpoint_current;
 		--iter;
@@ -586,9 +586,10 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, 4);
 		gsl_spline_init(spline, x, y, 4);
 		*/
+		get_cspline_coefs(x,y,coefs);
 
 		for(unsigned int i = 0; i < bufsize; i++) {
-			dest[i] = cspline_interp(x,y,phase);
+			dest[i] = cspline_interp(coefs,phase);
 			//dest[i] = gsl_spline_eval(spline, phase, acc);
 			//dest[i] = y[1] + phase / (float)x[2] *(y[2] - y[1]);
 			++phase;
@@ -610,6 +611,7 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 					++iter;
 					y[i] = iter->get_amplitude();
 				}
+				get_cspline_coefs(x,y,coefs);
 				/*
 				gsl_spline_init(spline, x, y, 4);
 				gsl_interp_accel_reset(acc);

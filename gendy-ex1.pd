@@ -1,4 +1,4 @@
-#N canvas 4 182 1369 435 10;
+#N canvas 4 230 1369 435 10;
 #X obj 163 35 gendy-gui;
 #X obj 547 393 dac~;
 #X obj 674 248 hip~ 20;

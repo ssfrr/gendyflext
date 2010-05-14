@@ -51,7 +51,7 @@ void breakpoint::elastic_move(gendydur_t h_step, gendyamp_t v_step,
 	gendyamp_t new_amplitude;
 
 	new_duration = old_duration *  
-			pow(center_dur / old_duration,h_pull) * 
+			pow(center_dur / old_duration,h_pull * h_step) * 
 			exp(gauss() *0.1 * h_step * (1.0-h_pull));
 	/*new_duration = old_duration + round((1.0 - h_pull) * h_step * gauss() +
 		(h_pull * (center_dur - old_duration))); */

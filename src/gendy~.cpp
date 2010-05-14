@@ -24,7 +24,7 @@ gendy::gendy() {
 	id = gendy_count;
 	gendy_count++;
 	if(debug)
-		post("gendy~ #%d: Constructor initiated", id);
+		print_log("gendy~ #%d: Constructor initiated", id, LOG_DEBUG);
 	AddInAnything("control input");	// control input
 	AddInAnything("frequency input");	// frequency input
 	AddOutSignal("audio out");		  // audio output
@@ -32,15 +32,15 @@ gendy::gendy() {
 	display_buf = NULL;
 
 	if(debug)
-		post("gendy~ #%d: Constructor terminated", id);
+		print_log("gendy~ #%d: Constructor terminated", id, LOG_DEBUG);
 }
 
 gendy::~gendy() {
 	if(debug)
-		post("gendy~ #%d: Destructor initiated", id);
+		print_log("gendy~ #%d: Destructor initiated", id, LOG_DEBUG);
 	gendy_count--;
 	if(debug)
-		post("gendy~ #%d: Destructor terminated", id);
+		print_log("gendy~ #%d: Destructor terminated", id, LOG_DEBUG);
 }
 
 void gendy::class_setup(t_classid thisclass) {
@@ -193,7 +193,7 @@ void gendy::redraw() {
 	gendysamp_t *temp_buf;
 
 	if(!display_buf || !display_buf->Ok()) {
-		print_log("gendy-sfr: Invalid Buffer", LOG_ERROR);
+		print_log("gendy~: Invalid Buffer", LOG_ERROR);
 		return;
 	}
 

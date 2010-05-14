@@ -3,6 +3,16 @@
 #
 NAME=gendy~
 SRCDIR=src
-SRCS=main.cpp gendy_sfr.cpp
-HDRS=gendy_sfr.h
+SRCS= 	breakpoint.cpp \
+		gendy~.cpp \
+		gendy_waveform.cpp \
+		log.cpp \
+		splines.cpp \
+		util.cpp 
 
+HDRS=	breakpoint.h \
+		gendy~.h \
+		gendy_waveform.h \
+		log.h \
+		splines.h \
+		util.h 

@@ -1,62 +1,9 @@
+#ifndef GENDY_WAVEFORM_H
+#define GENDY_WAVEFORM_H
+
+#include "types.h"
+#include "breakpoint.h"
 #include <list>
-
-#include <flext.h>
-
-//using namespace std;
-
-#define LOG_NONE 0
-#define LOG_ERROR 1
-#define LOG_INFO 2
-#define LOG_DEBUG 3
-
-#define LOG_LEVEL LOG_DEBUG
-
-extern void print_log(const char *msg, int level);
-extern void print_log(const char *msg, int arg1, int level);
-extern void print_log(const char *msg, unsigned int arg1, int level);
-extern void print_log(const char *msg, float arg1, int level);
-
-// define interpolation types
-enum interpolation_t{ LINEAR, CUBIC, SPLINE, SINC };
-
-// define center waveform shapes
-enum waveshape_t { FLAT, SINE, SQUARE, TRIANGLE, SAWTOOTH };
-
-// define types
-typedef float gendydur_t;
-typedef float gendyamp_t;
-typedef float gendysamp_t;
-
-// class defs
-class breakpoint
-{
-	// store current breakpoint location
-	// duration is in samples
-	gendyamp_t amplitude;
-	gendydur_t duration;
-
-	// store the center point the breakpoint gravitates to
-	gendyamp_t center_amp;
-	gendydur_t center_dur;
-
-	public:
-	breakpoint();
-	breakpoint(gendydur_t duration, gendyamp_t amplitude);
-	breakpoint(gendydur_t duration, gendyamp_t amplitude,
-			gendydur_t center_dur, gendyamp_t center_amp);
-	void elastic_move(gendydur_t h_step, gendyamp_t v_step, 
-			gendydur_t h_pull, gendyamp_t v_pull);
-	void set_duration(gendydur_t new_duration);
-	void set_amplitude(gendyamp_t new_amplitude);
-	void set_position(gendydur_t new_duration, gendyamp_t new_amplitude);
-	void set_center_duration(gendydur_t new_duration);
-	void set_center_amplitude(gendyamp_t new_amplitude);
-	void set_center(gendydur_t new_duration, gendyamp_t new_amplitude);
-	gendydur_t get_duration() const;
-	gendyamp_t get_amplitude() const;
-	gendydur_t get_center_duration() const;
-	gendyamp_t get_center_amplitude() const;
-}; //end breakpoint class def
 
 class gendy_waveform
 {
@@ -118,14 +65,4 @@ class gendy_waveform
 	unsigned int get_cycle(gendysamp_t *dest, unsigned int bufsize) const;
 }; //end gendy_waveform class def
 
-// misc utility functions
-
-// return a uniformly distributed double-precision float between 0 and 1
-double randf();
-
-// returns gaussian random variable with mu 0 and sigma 1
-// From the GNU Scientific Library, src/randist/gauss.c, released under GPL
-double gauss();
-
-// returns nearest integer. X.5 always rounded to X+1, so it's non-symmetrical
-int round(float num);
+#endif /* GENDY_WAVEFORM_H */

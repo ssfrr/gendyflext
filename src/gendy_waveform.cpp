@@ -1,171 +1,12 @@
-// TODO:
-// check constructors/destructors/copy constructors/assignment
-// check waveform buffer resizing
-// add license stuff to header/implementation files
-//
-
-#include "gendy_sfr.h"
+#include "gendy_waveform.h"
+#include "log.h"
+#include "splines.h"
+#include <list>
 #include <limits>
-#include <ctime>
-#include <cstdlib>
-#include <cmath>
 #include <cassert>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
+#include <cmath>
 
 using namespace std;
-
-// shows msg if allowed by LOG_LEVEL
-#ifdef PD_MAJOR_VERSION
-extern void print_log(const char *msg, int level){
-  if (LOG_LEVEL >= level) {
-    post(msg);
-  }
-}
-
-extern void print_log(const char *msg, int arg1, int level){
-  if (LOG_LEVEL >= level) {
-    post(msg, arg1);
-  }
-}
-
-extern void print_log(const char *msg, unsigned int arg1, int level){
-  if (LOG_LEVEL >= level) {
-    post(msg, arg1);
-  }
-}
-
-extern void print_log(const char *msg, float arg1, int level){
-  if (LOG_LEVEL >= level) {
-    post(msg, arg1);
-  }
-}
-#else
-extern void print_log(char *msg, int level) {}
-extern void print_log(const char *msg, float arg1, int level){}
-extern void print_log(const char *msg, float arg1, int level){}
-#endif
-
-breakpoint::breakpoint() {
-	print_log("gendy~: New breakpoint with default args", LOG_DEBUG);
-	duration = 0;
-	amplitude = 0;
-	center_dur = 0;
-	center_amp = 0;
-}
-
-breakpoint::breakpoint(gendydur_t duration, gendyamp_t amplitude) {
-	print_log("gendy~: New breakpoint with duration %u", duration, LOG_DEBUG);
-	print_log("gendy~: \t\t\tamplitude %f", amplitude, LOG_DEBUG);
-	this->duration = duration;
-	this->amplitude = amplitude;
-}
-
-breakpoint::breakpoint(gendydur_t duration, gendyamp_t amplitude,
-		gendydur_t center_dur, gendyamp_t center_amp) {
-	print_log("gendy~: New breakpoint with duration %u", duration, LOG_DEBUG);
-	print_log("gendy~: \t\t\tamplitude %f", amplitude, LOG_DEBUG);
-	print_log("gendy~: \t\t\tcenter_dur %u", center_dur, LOG_DEBUG);
-	print_log("gendy~: \t\t\tcenter_amp %f", center_amp, LOG_DEBUG);
-	this->duration = duration;
-	this->amplitude = amplitude;
-	this->center_dur = center_dur;
-	this->center_amp = center_amp;
-}
-
-// elastic_move
-//
-// elastic_move sets a new position for the breakpoint. The breakpoint is
-// moved (vertically and horizontally) from its current position by a normal
-// distributed distance, the standard deviations of which are h_step and
-// v_step.
-//
-// the breakpoint is also pulled toward its center by the factors h_pull and
-// v_pull, with a 1 corresponding to immediately jumping to the center point
-// and 0 not pulling toward the center point at all.
-//
-// amplitudes out of the audio range [-1,1] are mirrored back in. 
-// durations less than 2 samples are set to 2. 
-//
-void breakpoint::elastic_move(gendydur_t h_step, gendyamp_t v_step, 
-		gendydur_t h_pull, gendyamp_t v_pull) {
-	gendydur_t old_duration = duration;
-	gendydur_t new_duration;
-	gendyamp_t new_amplitude;
-
-	new_duration = old_duration *  
-			pow(center_dur / old_duration,h_pull) * 
-			exp(gauss() *0.1 * h_step * (1.0-h_pull));
-	/*new_duration = old_duration + round((1.0 - h_pull) * h_step * gauss() +
-		(h_pull * (center_dur - old_duration))); */
-	// set boundaries on new_duration
-	if(new_duration < 2)
-		new_duration = 2;
-	
-	new_amplitude = amplitude + v_step *
-			(v_pull * (center_amp - amplitude) +
-			(1.0 - v_pull) * gauss());
-	/*new_amplitude = amplitude + (1 - v_pull) * v_step * gauss() +
-		v_pull * (center_amp - amplitude);*/
-	// set mirror boundaries on new_amplitude
-	do {
-		if(new_amplitude > 1)
-			new_amplitude = 2 - new_amplitude;
-		if(new_amplitude < -1)
-			new_amplitude = -2 - new_amplitude;
-	} while (new_amplitude < -1 || new_amplitude > 1);
-
-	duration = new_duration;
-	amplitude = new_amplitude;
-}
-
-void breakpoint::set_duration(gendydur_t new_duration) {
-	duration = new_duration;
-}
-
-void breakpoint::set_amplitude(gendyamp_t new_amplitude) {
-	amplitude = new_amplitude;
-}
-
-void breakpoint::set_position(gendydur_t new_duration, gendyamp_t new_amplitude) {
-	//TODO: argument sanitization
-	duration = new_duration;
-	amplitude = new_amplitude;
-}
-
-void breakpoint::set_center_duration(gendydur_t new_duration) {
-	center_dur = new_duration;
-}
-
-void breakpoint::set_center_amplitude(gendyamp_t new_amplitude) {
-	center_amp = new_amplitude;
-}
-
-// set_center
-// accessor function to set the amplitude and duration of a breakpoint's
-// center position
-
-void breakpoint::set_center(gendydur_t new_duration, gendyamp_t new_amplitude) {
-	//TODO: argument sanitization
-	center_dur= new_duration;
-	center_amp = new_amplitude;
-}
-
-gendydur_t breakpoint::get_duration() const {
-	return duration;
-}
-
-gendyamp_t breakpoint::get_amplitude() const {
-	return amplitude;
-}
-
-gendydur_t breakpoint::get_center_duration() const {
-	return center_dur;
-}
-
-gendyamp_t breakpoint::get_center_amplitude() const {
-	return center_amp;
-}
 
 // gendy_waveform class constructor with all default arguments
 gendy_waveform::gendy_waveform() {
@@ -496,35 +337,6 @@ void gendy_waveform::reset_breakpoints() {
 				current->get_center_amplitude());
 }
 
-void get_cspline_coefs(double *xp, double *yp, double *coefs) {
-	double h[3];
-	// h[n] is the x-distance between x[n] and x[n+1]
-	for(int i = 0; i < 3; i++)
-		h[i] = xp[i+1] - xp[i];
-	// d[i] is the slope of the line segment connecting point i
-	// to point i+1
-	double d[3];
-	for(int i = 0; i < 3; i++) 
-		d[i] = (yp[i+1] - yp[i]) / h[i];
-	//yd[n] is the derivitive of f(x) at xp[1] and xp[2]. It's a
-	//weighted average of the two adjacent line segments
-	double yd[3];
-	for(int i = 1; i < 3; i++) 
-		yd[i] = (d[i] * h[i-1] + d[i-1] * h[i]) / (h[i-1] + h[i]);
-	// Here we actually calculate the coefficients
-	coefs[0] = (h[1]*(yd[2] - yd[1]) - 
-			2 * (yp[2] - yp[1] - h[1] * yd[1])) / (h[1] * h[1] * h[1]);
-	coefs[1] = (3 * (yp[2] - yp[1] - h[1] * yd[1]) - 
-			h[1] * (yd[2] - yd[1])) / (h[1] * h[1]);
-	coefs[2] = yd[1];
-	coefs[3] = yp[1];
-
-}
-
-double cspline_interp(double *coefs, double x) {
-	return coefs[3] + x * (coefs[2] + x * (coefs[1] + coefs[0] * x));
-}
-
 
 /* 
  * generates a block of gendy audio.
@@ -700,31 +512,4 @@ unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) 
 		}
 		return i;
 	}
-}
-
-// return a uniformly distributed double-precision float between 0 and 1
-double randf() {
-	return rand() / static_cast<double>(RAND_MAX);
-}
-
-// returns gaussian random variable with mu 0 and sigma 1
-// From the GNU Scientific Library, src/randist/gauss.c
-
-double gauss() {
-	double x, y, r2;
-	do {
-		/* choose x,y in uniform square (-1,-1) to (+1,+1) */ 
-		x = -1 + 2 * randf();
-		y = -1 + 2 * randf();
-
-		/* see if it is in the unit circle */
-		r2 = x * x + y * y;
-	} while (r2 > 1.0 || r2 == 0);
-
-	/* Box-Muller transform */
-	return y * sqrt (-2.0 * log(r2) / r2);
-}
-
-int round(float num) {
-	return int(floor(num + 0.5));
 }

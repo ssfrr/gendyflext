@@ -5,5 +5,4 @@ NAME=gendy~
 SRCDIR=src
 SRCS=main.cpp gendy_sfr.cpp
 HDRS=gendy_sfr.h
-BUILDDIR=build
 

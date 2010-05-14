@@ -581,17 +581,10 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 		}
 		//iter is now pointing at the 4th point of this set
 
-		//TODO: maybe make these static or class members to reduce malloc overhead?
-		/*gsl_interp_accel *acc = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, 4);
-		gsl_spline_init(spline, x, y, 4);
-		*/
 		get_cspline_coefs(x,y,coefs);
 
 		for(unsigned int i = 0; i < bufsize; i++) {
 			dest[i] = cspline_interp(coefs,phase);
-			//dest[i] = gsl_spline_eval(spline, phase, acc);
-			//dest[i] = y[1] + phase / (float)x[2] *(y[2] - y[1]);
 			++phase;
 			//if we're past the end of the segment
 			if(phase > x[2]) {
@@ -612,15 +605,8 @@ unsigned int gendy_waveform::get_block(gendysamp_t *dest, unsigned int bufsize) 
 					y[i] = iter->get_amplitude();
 				}
 				get_cspline_coefs(x,y,coefs);
-				/*
-				gsl_spline_init(spline, x, y, 4);
-				gsl_interp_accel_reset(acc);
-				*/
 			}
 		}
-		/*gsl_spline_free(spline);
-		gsl_interp_accel_free(acc);
-		*/
 	}
 	else {
 		print_log("gendy~: Unimplemeted Interpolation Type", LOG_ERROR);
@@ -666,44 +652,46 @@ unsigned int gendy_waveform::get_cycle(gendysamp_t *dest, unsigned int bufsize) 
 	}
 	else if(interpolation_type == CUBIC) {
 		assert(get_num_guardpoints() == 3);
-		unsigned int N = breakpoint_list.size();
-		double *x = (double *)malloc(N * sizeof(double));
-		assert(x != 0);
-		double *y = (double *)malloc(N * sizeof(double));
-		assert(y != 0);
-		list<breakpoint>::const_iterator current = breakpoint_list.begin();
-		double guardpoint_offset = 0;
-		while(current != breakpoint_begin) {
-			guardpoint_offset += current->get_duration();
-			current++;
+		double x[4];
+		double y[4];
+		double coefs[4];
+		double x_in = 0;
+		// set iter to be the first guard breakpoint 
+		list<breakpoint>::const_iterator iter = breakpoint_begin;
+		--iter;
+		//collect the 4 points needed to interpolate in the first segment
+		//x[0] will be negative enough to make x[1]=0, the beginning of 
+		//the segment we're actually interested in here
+		x[0] = -iter->get_duration();
+		y[0] = iter->get_amplitude();
+		for(int i = 1; i < 4; i++) {
+			x[i] = x[i-1] + iter->get_duration();
+			++iter;
+			y[i] = iter->get_amplitude();
 		}
-		current = breakpoint_list.begin();
+		//iter is now pointing at the 4th point of this set
 
-		x[0] = -guardpoint_offset;
-		y[0] = current->get_amplitude();
-		for(int i = 1; i < N; i++) {
-			x[i] = x[i-1] + current->get_duration();
-			++current;
-			y[i] = current->get_amplitude();
+		get_cspline_coefs(x,y,coefs);
+
+		unsigned int i = 0;
+		for(i = 0; i < bufsize && iter != breakpoint_list.end(); i++) {
+			dest[i] = cspline_interp(coefs,x_in);
+			++x_in;
+			//if we're past the end of the segment
+			if(x_in > x[2]) {
+				x_in -= x[2];
+				for(int j = 0; j < 3; ++j) {
+					x[j] = x[j+1] - x[2];
+					y[j] = y[j+1];
+				}
+				x[3] = x[2] + iter->get_duration();
+				if(++iter != breakpoint_list.end()) {
+					y[3] = iter->get_amplitude();
+					get_cspline_coefs(x,y,coefs);
+				}
+			}
 		}
-
-		gsl_interp_accel *acc = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, N);
-		gsl_spline_init(spline, x, y, N);
-
-		int i = 0;
-		while(i < x[N-1] && i < bufsize) {
-			dest[i] = gsl_spline_eval(spline, i, acc);
-			i++;
-		}
-
-		gsl_spline_free(spline);
-		gsl_interp_accel_free(acc);
-		free(x);
-		free(y);
-
 		return i;
-
 	}
 }
 

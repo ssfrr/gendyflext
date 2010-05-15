@@ -1,8 +1,8 @@
-#N canvas 8 73 1283 831 10;
-#X obj 701 302 gendy~;
+#N canvas 109 96 999 740 10;
+#X obj 719 352 gendy~;
 #X msg 27 457 h_pull \$1;
-#X obj 689 356 dac~;
-#X obj 701 328 *~ 0.1;
+#X obj 707 406 dac~;
+#X obj 719 378 *~ 0.1;
 #X obj 30 438 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
 -1 -1 0 1;
 #X obj 236 443 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
@@ -23,7 +23,7 @@
 #N canvas 0 0 450 300 (subpatch) 0;
 #X array gendygraph 1024 float 2;
 #X coords 0 1 1023 -1 200 140 1;
-#X restore 668 96 graph;
+#X restore 686 146 graph;
 #X msg 448 168 table gendygraph;
 #X msg 449 487 redraw;
 #X msg 37 610 linear;
@@ -32,7 +32,7 @@
 #X msg 263 648 square;
 #X msg 239 606 flat;
 #X obj 449 466 metro 75;
-#X obj 449 447 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+#X obj 449 447 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 1
 1;
 #X floatatom 25 97 5 0 0 0 - - -;
 #X obj 25 137 s gendy_con;
@@ -44,11 +44,11 @@
 #X obj 449 508 s gendy_con;
 #X obj 239 671 s gendy_con;
 #X obj 28 632 s gendy_con;
-#X obj 701 276 r gendy_con;
+#X obj 719 326 r gendy_con;
 #X obj 448 145 loadbang;
 #X obj 239 127 s gendy_con;
-#X text 660 408 gendy~;
-#X text 660 431 A Dynamic Stochastic Synthesis external;
+#X text 677 456 gendy~;
+#X text 676 481 A Dynamic Stochastic Synthesis external;
 #X text 22 21 freq N;
 #X text 22 43 Sets the average waveform;
 #X text 22 56 frequency to N;
@@ -90,6 +90,10 @@
 #X text 446 374 display;
 #X obj 449 401 loadbang;
 #X msg 449 421 1;
+#X text 676 506 This synthesizer creates a waveform by;
+#X text 676 518 interpolating a series of breakpoints \,;
+#X text 676 531 each of which moves in a 2-dimensional;
+#X text 676 543 random walk;
 #X connect 0 0 3 0;
 #X connect 1 0 29 0;
 #X connect 3 0 2 0;

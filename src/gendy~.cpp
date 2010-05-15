@@ -53,7 +53,6 @@ gendy::gendy() {
 	if(debug)
 		print_log("gendy~ #%d: Constructor initiated", id, LOG_DEBUG);
 	AddInAnything("control input");	// control input
-	AddInAnything("frequency input");	// frequency input
 	AddOutSignal("audio out");		  // audio output
 
 	display_buf = NULL;
@@ -72,9 +71,7 @@ gendy::~gendy() {
 
 void gendy::class_setup(t_classid thisclass) {
 	// associate methods with incoming messages on inlet 0
-	// numerical input is taken as frequency
 	print_log("Class constructor beginning", LOG_DEBUG);
-	FLEXT_CADDMETHOD(thisclass, 1, set_frequency);
 	FLEXT_CADDMETHOD_(thisclass, 0, "freq", set_frequency);
 	FLEXT_CADDMETHOD_(thisclass, 0, "breakpoints", set_num_breakpoints);
 	FLEXT_CADDMETHOD_(thisclass, 0, "h_step", set_h_step);

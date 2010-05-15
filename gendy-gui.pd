@@ -1,7 +1,7 @@
 #N canvas 4 592 1369 398 10;
 #X obj 552 303 gendy~;
 #X obj 298 219 hsl 128 15 50 2000 1 0 \$0-freq \$0-freq_in Freq -2
--8 0 10 -262144 -1 -1 12700 1;
+-8 0 10 -262144 -1 -1 3786 1;
 #X msg 527 153 h_pull \$1;
 #X msg 706 153 v_pull \$1;
 #X msg 618 154 h_step \$1;
@@ -162,7 +162,6 @@
 #X msg 489 81 table \$1-waveform;
 #X obj 1113 123 metro 75;
 #X msg 1183 124 display \$1;
-#X obj 1115 30 block~ 1024;
 #X connect 0 0 15 0;
 #X connect 2 0 0 0;
 #X connect 2 0 17 0;

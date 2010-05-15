@@ -1,30 +1,27 @@
-#N canvas 109 96 999 740 10;
+#N canvas 374 166 999 740 10;
 #X obj 719 352 gendy~;
 #X msg 27 457 h_pull \$1;
 #X obj 707 406 dac~;
 #X obj 719 378 *~ 0.1;
 #X obj 30 438 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
+-1 -1 12700 1;
 #X obj 236 443 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
+-1 -1 12700 1;
 #X msg 233 462 v_pull \$1;
 #X obj 238 254 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
+-1 -1 9300 1;
 #X msg 235 273 v_step \$1;
 #X obj 29 255 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
+-1 -1 10600 1;
 #X msg 26 274 h_step \$1;
 #X obj 28 77 hsl 128 15 20 10000 1 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
+-1 -1 7300 1;
 #X msg 25 115 freq \$1;
-#X obj 242 85 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
-#X msg 239 105 breakpoints \$1;
+#X msg 239 123 breakpoints \$1;
 #N canvas 0 0 450 300 (subpatch) 0;
 #X array gendygraph 1024 float 2;
 #X coords 0 1 1023 -1 200 140 1;
 #X restore 686 146 graph;
-#X msg 448 168 table gendygraph;
 #X msg 449 487 redraw;
 #X msg 37 610 linear;
 #X msg 28 589 cubic;
@@ -46,7 +43,7 @@
 #X obj 28 632 s gendy_con;
 #X obj 719 326 r gendy_con;
 #X obj 448 145 loadbang;
-#X obj 239 127 s gendy_con;
+#X obj 239 145 s gendy_con;
 #X text 677 456 gendy~;
 #X text 676 481 A Dynamic Stochastic Synthesis external;
 #X text 22 21 freq N;
@@ -94,32 +91,37 @@
 #X text 676 518 interpolating a series of breakpoints \,;
 #X text 676 531 each of which moves in a 2-dimensional;
 #X text 676 543 random walk;
+#X obj 239 83 hradio 15 1 0 10 empty empty empty 0 -8 0 10 -262144
+-1 -1 6;
+#X obj 239 102 + 1;
+#X msg 448 168 table gendygraph;
 #X connect 0 0 3 0;
-#X connect 1 0 29 0;
+#X connect 1 0 27 0;
 #X connect 3 0 2 0;
 #X connect 3 0 2 1;
 #X connect 4 0 1 0;
 #X connect 5 0 6 0;
-#X connect 6 0 30 0;
+#X connect 6 0 28 0;
 #X connect 7 0 8 0;
-#X connect 8 0 28 0;
+#X connect 8 0 26 0;
 #X connect 9 0 10 0;
-#X connect 10 0 27 0;
-#X connect 11 0 25 0;
-#X connect 12 0 26 0;
-#X connect 13 0 14 0;
-#X connect 14 0 37 0;
-#X connect 16 0 31 0;
+#X connect 10 0 25 0;
+#X connect 11 0 23 0;
+#X connect 12 0 24 0;
+#X connect 13 0 35 0;
+#X connect 15 0 30 0;
+#X connect 16 0 32 0;
 #X connect 17 0 32 0;
-#X connect 18 0 34 0;
-#X connect 19 0 34 0;
-#X connect 20 0 33 0;
-#X connect 21 0 33 0;
-#X connect 22 0 33 0;
-#X connect 23 0 17 0;
-#X connect 24 0 23 0;
-#X connect 25 0 12 0;
-#X connect 35 0 0 0;
-#X connect 36 0 16 0;
-#X connect 79 0 80 0;
-#X connect 80 0 24 0;
+#X connect 18 0 31 0;
+#X connect 19 0 31 0;
+#X connect 20 0 31 0;
+#X connect 21 0 15 0;
+#X connect 22 0 21 0;
+#X connect 23 0 12 0;
+#X connect 33 0 0 0;
+#X connect 34 0 85 0;
+#X connect 77 0 78 0;
+#X connect 78 0 22 0;
+#X connect 83 0 84 0;
+#X connect 84 0 13 0;
+#X connect 85 0 29 0;

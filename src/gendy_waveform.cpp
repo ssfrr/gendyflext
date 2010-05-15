@@ -40,7 +40,7 @@ using namespace std;
 // gendy_waveform class constructor with all default arguments
 gendy_waveform::gendy_waveform() {
 	//initialize variables to defaults
-	step_width = 30;
+	step_width = 0.1;
 	step_height = 0.1;
 	duration_pull = 0.7;
 	amplitude_pull = 0.4;

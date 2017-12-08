@@ -235,8 +235,8 @@ void gendy::redraw() {
 	int wavelength = waveform.get_wavelength();
 	waveform.get_cycle(temp_buf, bufsize);
 	// here we copy from the raw float array to the flext buffer object
-	while(n < wavelength && n < bufsize)
-		(*display_buf)[n] = temp_buf[n++];
+	for(; n < wavelength && n < bufsize; ++n)
+		(*display_buf)[n] = temp_buf[n];
 	delete temp_buf;
 	// zero out the rest of the buffer
 	while(n < bufsize)

@@ -91,7 +91,7 @@ void gendy::class_setup(t_classid thisclass) {
 	print_log("",LOG_INFO);
 	print_log("-- gendy~ v%d.%d.%d by Spencer Russell --",
 			GENDY_MAJ, GENDY_MIN, GENDY_REV, LOG_INFO);
-	print_log("gendy~: please report bugs to http://code.airwav.es/projects/gendy/issues", LOG_INFO);
+	print_log("gendy~: please report bugs to https://github.com/ssfrr/gendyflext/issues", LOG_INFO);
 	print_log("Class constructor ending", LOG_DEBUG);
 }
 
